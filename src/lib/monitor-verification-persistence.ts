@@ -6,6 +6,7 @@ const MAX_TECH = 50_000;
 
 export async function persistMonitorVerificationFailure(
   linkId: string,
+  userId: string,
   opts: {
     userFacingMessage: string;
     technicalDetail: string;
@@ -20,10 +21,12 @@ export async function persistMonitorVerificationFailure(
     0,
     MAX_TECH,
   );
+  const now = new Date();
   await prisma.$transaction([
     prisma.monitorVerificationLog.create({
       data: {
         linkId,
+        userId,
         success: false,
         userFacingMessage: userFacing,
         technicalDetail: technical,
@@ -31,10 +34,17 @@ export async function persistMonitorVerificationFailure(
         batchId: opts.batchId ?? null,
       },
     }),
-    prisma.companyLink.update({
-      where: { id: linkId },
-      data: {
-        lastMonitorErrorAt: new Date(),
+    prisma.userCompanyLinkResult.upsert({
+      where: { userId_linkId: { userId, linkId } },
+      create: {
+        userId,
+        linkId,
+        lastMonitorErrorAt: now,
+        lastMonitorErrorMessage: userFacing,
+        lastMonitorErrorDetail: technical,
+      },
+      update: {
+        lastMonitorErrorAt: now,
         lastMonitorErrorMessage: userFacing,
         lastMonitorErrorDetail: technical,
       },
