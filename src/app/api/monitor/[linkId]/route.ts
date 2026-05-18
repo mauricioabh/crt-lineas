@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { chromium } from "playwright";
+import { launchChromium } from "@/lib/playwright-launch";
 import { requireUserId } from "@/lib/auth";
 import { requireMonitorCredentials } from "@/lib/verification-profile";
 import { prisma } from "@/lib/db";
@@ -54,8 +54,11 @@ export async function POST(
   }
 
   const bulkRun = new URL(request.url).searchParams.get("bulk") === "1";
-  /** Verificación masiva (`?bulk=1`): siempre headless para no abrir muchas ventanas ni competir con `PLAYWRIGHT_HEADED`. */
-  const headed = process.env.PLAYWRIGHT_HEADED === "true" && !bulkRun;
+  /** Verificación masiva (`?bulk=1`): siempre headless. En Vercel no hay modo headed. */
+  const headed =
+    process.env.PLAYWRIGHT_HEADED === "true" &&
+    !bulkRun &&
+    process.env.VERCEL !== "1";
   const manualWaitMs = Number(process.env.MONITOR_MANUAL_WAIT_MS ?? 120_000);
   const curp = credentials.curp;
   const phone = credentials.phone;
@@ -75,7 +78,7 @@ export async function POST(
 
   let browser;
   try {
-    browser = await chromium.launch({ headless: !headed });
+    browser = await launchChromium({ headless: !headed });
   } catch (launchErr) {
     const { userMessage, technical } = formatUnknownMonitorError(launchErr);
     console.error(

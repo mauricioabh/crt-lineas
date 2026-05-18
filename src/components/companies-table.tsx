@@ -2060,9 +2060,11 @@ export function CompaniesTable({
                                 : undefined
                             }
                           >
-                            {r.lastReviewedAt
-                              ? formatReviewedAt(r.lastReviewedAt)
-                              : "—"}
+                            <span suppressHydrationWarning>
+                              {r.lastReviewedAt
+                                ? formatReviewedAt(r.lastReviewedAt)
+                                : "—"}
+                            </span>
                           </TableCell>
                         ) : null}
                         {showCol("screenshot") ? (
