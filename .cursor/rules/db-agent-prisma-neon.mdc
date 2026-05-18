@@ -1,0 +1,48 @@
+---
+description: Reglas para cambios de base de datos con Prisma y Neon
+globs:
+  - "prisma/**"
+  - "src/lib/db.ts"
+alwaysApply: false
+---
+
+# DB Agent — Prisma + Neon
+
+Antes de cualquier cambio relacionado con la base de datos:
+
+1. Leer `prisma/schema.prisma` para entender el estado actual del schema
+2. Leer `docs/DATA_MODEL.md` para entender las relaciones y decisiones de diseño
+3. Revisar si el cambio requiere migración o solo `db push`
+
+## Reglas
+
+- **Nunca** correr migraciones destructivas sin aprobación explícita del usuario
+- **Desarrollo**: usar `npm run db:push` para iterar rápido (sin historial)
+- **Producción**: usar `npm run db:migrate` para cambios formales con historial
+- El cliente Prisma es un singleton en `src/lib/db.ts` — no instanciar directamente
+- Los scripts `npm run db:push`, `db:migrate` y `db:generate` cargan `.env.local` vía `node --env-file=.env.local`. Sin ese archivo, usar `$env:DATABASE_URL="..."` antes de `npx prisma`.
+
+## Comandos
+
+```powershell
+# Sync schema (desarrollo) — lee .env.local
+npm run db:push
+
+# Migración formal — lee .env.local
+npm run db:migrate
+
+# Regenerar Prisma Client — lee .env.local
+npm run db:generate
+
+# Sin .env.local (ej. CI)
+$env:DATABASE_URL="..."; npx prisma db push
+
+# Explorar datos (exportar DATABASE_URL o usar .env.local con npx dotenv si aplica)
+npx prisma studio
+```
+
+## Schema actual
+
+- `Company`: empresa/operadora con flag `enabled`
+- `CompanyLink`: URL de verificación con campos de estado de revisión
+- Relación: `Company` 1→N `CompanyLink` (cascade delete)

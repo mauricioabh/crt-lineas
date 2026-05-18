@@ -1,0 +1,59 @@
+---
+description: Contexto del proyecto crt-lineas — monitor de líneas CRT
+globs:
+alwaysApply: true
+---
+
+# crt-lineas
+
+Herramienta interna para monitorear la disponibilidad de líneas de telefonía en el portal de la CRT (Comisión de Regulación de Telecomunicaciones / equivalente mexicano). Permite scraping de operadoras y verificación automatizada por CURP usando Playwright.
+
+## Stack
+
+- **Next.js 16** (App Router) — `src/app/`
+- **Clerk** — autenticación y roles vía `publicMetadata.role`
+- **Prisma 6** + **Neon (PostgreSQL)** — ORM y base de datos
+- **Playwright** — scraping CRT y verificación de líneas
+- **Tailwind v4** + **shadcn** (base-ui) — UI
+- **TypeScript** strict
+
+## Estructura
+
+```
+src/
+  app/
+    (auth)/          — sign-in / sign-up (Clerk)
+    (dashboard)/     — dashboard principal + layout con header
+    api/
+      companies/     — GET lista, PATCH enabled (admin)
+      company-links/ — PATCH estado de revisión
+      ingest/        — POST scraping CRT con Playwright
+      monitor/       — POST verificación de línea por CURP
+  components/        — companies-table, status-badge, ui/
+  lib/               — auth.ts, db.ts, http.ts, crt-ingest.ts, utils.ts
+  proxy.ts           — Clerk (Next.js 16 Proxy; antes middleware): público /, /sign-in, /sign-up; resto protegido
+  monitoring/
+    index.ts         — registro de patrones
+    base-pattern.ts  — tipos MonitorResult, CompanyPattern
+    patterns/        — generic.ts, telcel.ts, movistar.ts, altan-rnu.ts
+prisma/
+  schema.prisma      — modelos Company y CompanyLink
+```
+
+## Entidades principales
+
+- **Company**: empresa/operadora (`name`, `enabled`)
+- **CompanyLink**: URL de verificación por empresa (`url`, `label`, estado de revisión)
+
+## Roles
+
+- `admin` — ve todas las empresas, puede togglear enabled, puede correr ingest
+- `user` — solo ve empresas habilitadas, puede verificar y reportar revisión manual
+
+## Variables de entorno
+
+Ver `docs/ENV.md` y `.env.example`.
+
+## Documentación
+
+Ver `docs/` para PRD, fases, data model, stack, contribución y testing.

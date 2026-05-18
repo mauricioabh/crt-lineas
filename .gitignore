@@ -13,6 +13,10 @@
 # testing
 /coverage
 
+# playwright (local sessions + auth state)
+/.playwright/
+/.playwright-session/
+
 # next.js
 /.next/
 /out/
@@ -35,6 +39,9 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# Playwright review screenshots (written by monitor; local/dev)
+/data/
 
 # typescript
 *.tsbuildinfo

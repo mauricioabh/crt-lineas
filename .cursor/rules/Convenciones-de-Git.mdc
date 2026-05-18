@@ -1,0 +1,46 @@
+---
+description: Convenciones de Git y ramas para crt-lineas
+globs:
+alwaysApply: true
+---
+
+# Convenciones de Git
+
+## Ramas
+
+- `main` — producción, siempre estable
+- `dev` — desarrollo activo, base para features
+- `feat/<nombre>` — nuevas funcionalidades
+- `fix/<nombre>` — corrección de bugs
+- `db/<nombre>` — cambios de schema / migraciones
+- `ci/<nombre>` — cambios de CI/CD o infraestructura
+
+## Commits (Conventional Commits)
+
+Formato: `tipo(scope): descripción`
+
+Tipos permitidos:
+- `feat` — nueva funcionalidad
+- `fix` — corrección de bug
+- `refactor` — refactor sin cambio de comportamiento
+- `style` — formato, estilos (sin lógica)
+- `db` — cambios de schema Prisma o datos
+- `chore` — tareas de mantenimiento, deps
+- `docs` — documentación
+- `test` — tests
+- `ci` — CI/CD, workflows
+
+Ejemplos:
+```
+feat(monitor): implement telcel-specific CURP verification pattern
+fix(dashboard): serialize dates before passing to client component
+db: add reviewNotes field to CompanyLink
+docs: add monitoring patterns guide
+```
+
+## Pull Requests
+
+- PRs hacia `dev` para features normales
+- PRs hacia `main` solo desde `dev` (release) o hotfixes
+- Incluir descripción de cambios y cómo probar
+- CI debe pasar antes de merge

@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      SKIP_ENV_VALIDATION: "1"
+      DATABASE_URL: "postgresql://placeholder:placeholder@localhost/placeholder?sslmode=require"
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder_must_replace_in_production_00
+      CLERK_SECRET_KEY: sk_test_placeholder_must_replace_in_production_00000000
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+      NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
+      NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: /dashboard
+      NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: /dashboard
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  docs-coherence:
+    name: Docs coherence check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Schema changed without DATA_MODEL.md
+        run: |
+          SCHEMA_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- prisma/schema.prisma | wc -l)
+          DATAMODEL_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- docs/DATA_MODEL.md | wc -l)
+          if [ "$SCHEMA_CHANGED" -gt 0 ] && [ "$DATAMODEL_CHANGED" -eq 0 ]; then
+            echo "❌ prisma/schema.prisma changed but docs/DATA_MODEL.md was not updated."
+            echo "   Please update docs/DATA_MODEL.md to reflect the schema changes."
+            exit 1
+          fi
+          echo "✅ Schema/docs coherence OK"
+
+      - name: Env example changed without ENV.md
+        run: |
+          ENV_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- .env.example | wc -l)
+          ENVMD_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- docs/ENV.md | wc -l)
+          if [ "$ENV_CHANGED" -gt 0 ] && [ "$ENVMD_CHANGED" -eq 0 ]; then
+            echo "❌ .env.example changed but docs/ENV.md was not updated."
+            echo "   Please update docs/ENV.md to document the new environment variables."
+            exit 1
+          fi
+          echo "✅ Env/docs coherence OK"

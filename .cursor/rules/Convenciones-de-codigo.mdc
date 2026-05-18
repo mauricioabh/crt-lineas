@@ -1,0 +1,62 @@
+---
+description: Convenciones de código para crt-lineas
+globs:
+alwaysApply: true
+---
+
+# Convenciones de código
+
+## TypeScript
+
+- **Strict mode** habilitado — no usar `any` sin justificación
+- Inferir tipos de Prisma desde el schema; no duplicar interfaces manuales
+- Exhaustive switch para unions/enums (ver regla `typescript-exhaustive-switch`)
+- Imports al top del archivo, nunca inline (ver regla `no-inline-imports`)
+
+## Componentes
+
+- **Server Components** por defecto; solo `"use client"` cuando se necesita estado, efectos o eventos del browser
+- Nombres de archivos: `kebab-case.tsx`
+- Nombres de componentes: `PascalCase`
+- Componentes UI reutilizables en `src/components/ui/`
+- Lógica de negocio en `src/lib/`
+- Patrones de monitoreo en `src/monitoring/patterns/`
+
+## APIs
+
+- Autenticación: usar `requireUserId()` o `requireAdminUser()` de `src/lib/auth.ts` en cada route handler
+- Errores HTTP: usar helpers de `src/lib/http.ts`
+- Rutas admin: siempre validar con `requireAdminUser()`
+- Body parsing: validar con Zod antes de usar datos del request
+
+## Estilos
+
+- **Tailwind v4** — clases utilitarias
+- Usar `cn()` de `src/lib/utils.ts` para clases condicionales
+- No hardcodear colores; usar tokens CSS del tema
+- Componentes shadcn en `src/components/ui/`
+
+## Guardrails para agentes
+
+- **No escribir secretos** en archivos de código fuente
+- **No editar `.env.local`** — solo `.env.example`
+- **Pedir aprobación** antes de: migraciones destructivas, cambios en `prisma/schema.prisma`, cambios en `src/proxy.ts` (Clerk / Next.js 16 Proxy), refactors grandes
+- **MCPs disponibles**: `user-filesystem`, `user-github`, `plugin-neon-postgres-neon`, `plugin-vercel-vercel`, `plugin-clerk-clerk`
+
+## Documentación — obligatorio después de implementar
+
+Después de cualquier cambio, actualizar el documento correspondiente **en el mismo PR/commit**:
+
+| Tipo de cambio | Documento a actualizar |
+|----------------|------------------------|
+| Schema Prisma (`prisma/schema.prisma`) | `docs/DATA_MODEL.md` |
+| Nueva variable de entorno | `docs/ENV.md` + `.env.example` |
+| Nueva ruta API o cambio de contrato | `README.md` (tabla de rutas) |
+| Nuevo patrón de monitoreo | `docs/MONITORING_PATTERNS.md` |
+| Fase completada (checkboxes en PHASES) | `docs/PHASES.md` |
+| Cambio de stack o nueva dependencia significativa | `docs/TECH_STACK.md` |
+| Nuevo comando de Cursor | `docs/CONTRIBUTING.md` |
+
+**Regla**: si el cambio no tiene su doc actualizado, el PR no está completo.
+
+Al terminar una implementación, correr el command `/post-implementation` para verificar esta lista antes de hacer commit.
