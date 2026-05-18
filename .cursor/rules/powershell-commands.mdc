@@ -1,0 +1,17 @@
+---
+description: Reglas para comandos de terminal en Windows PowerShell
+globs:
+alwaysApply: true
+---
+
+# PowerShell — Windows
+
+Este proyecto corre en **Windows con PowerShell**. Seguir estas reglas al escribir comandos de terminal:
+
+- Usar `;` como separador de comandos, **nunca `&&`**
+- Usar `Set-Location` o `cd` para cambiar directorios
+- Usar `$env:VARIABLE="valor"` para variables de entorno en la sesión
+- Rutas con espacios deben ir entre comillas dobles
+- No asumir Bash, `grep`, `find`, `export`, ni otras utilidades Unix
+- Para encadenar comandos que dependen del anterior: usar `;` o comandos separados en el parámetro `working_directory`
+- Prefer `npx prisma` en lugar de `prisma` directamente

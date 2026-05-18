@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CRT Líneas — Monitoreo
 
-## Getting Started
+Aplicación Next.js para listar compañías del portal del CRT (México), guardar enlaces **solo tipo Persona**, y dar seguimiento semimanual con **Playwright** y autenticación **Clerk** (Google + correo/contraseña).
 
-First, run the development server:
+## Requisitos
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 20+
+- Cuenta [Neon](https://neon.tech) (Postgres) y cadena `DATABASE_URL`
+- Proyecto [Clerk](https://clerk.com) con inicio de sesión Google y email/contraseña
+
+## Configuración
+
+1. Copia `.env.example` a `.env.local` y completa las variables.
+2. Aplica el esquema a Neon:
+
+   ```bash
+   npm run db:push
+   ```
+
+   (Carga `DATABASE_URL` desde `.env.local` en dos pasos: sincroniza la base y luego regenera el cliente. **No** uses `npx prisma db push` sin variables: dará **P1012**. En Windows, si falla **EPERM** al regenerar, cierra `npm run dev` y ejecuta `npm run db:generate`.)
+
+3. Instala el navegador de Playwright (Chromium):
+
+   ```bash
+   npx playwright install chromium
+   ```
+
+4. Arranca en desarrollo:
+
+   ```bash
+   npm run dev
+   ```
+
+5. Abre [http://localhost:3000](http://localhost:3000), inicia sesión y entra a `/dashboard`.
+
+### Rol administrador
+
+En el panel de Clerk, asigna a un usuario en **Public metadata**:
+
+```json
+{ "role": "admin" }
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sin esto, el rol por defecto es `user` (solo ve compañías con `enabled: true` y no puede sincronizar ni activar/desactivar compañías).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Variables útiles
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable                                  | Descripción                                                          |
+| ----------------------------------------- | -------------------------------------------------------------------- |
+| `VERIFICATION_CREDENTIALS_ENCRYPTION_KEY` | Clave base64 (32 bytes) para cifrar CURP/celular en Neon             |
+| `MONITOR_CURP` / `MONITOR_PHONE`          | _(Legacy)_ Sustituidos por el perfil en `/dashboard/setup`           |
+| `PLAYWRIGHT_HEADED=true`                  | Abre Chromium visible (recomendado para captchas / flujo semimanual) |
+| `MONITOR_MANUAL_WAIT_MS`                  | Tiempo de espera (ms) en el patrón genérico tras cargar la página    |
 
-## Learn More
+## API
 
-To learn more about Next.js, take a look at the following resources:
+| Método   | Ruta                                     | Quién                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/me/verification-profile`           | Autenticado — `{ complete, curpMasked?, phoneMasked? }`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `PUT`    | `/api/me/verification-profile`           | Autenticado — `{ curp, phone, privacyNoticeAccepted: true }` (validados; se guardan cifrados). Requerido antes de verificar líneas.                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `DELETE` | `/api/me/verification-profile`           | Autenticado — elimina el CURP/celular cifrados del usuario.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `POST`   | `/api/ingest`                            | Admin — sincroniza compañías y enlaces Persona desde el CRT (Playwright)                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `GET`    | `/api/companies`                         | Autenticado — lista (usuarios normales: solo `enabled`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `PATCH`  | `/api/companies/[id]`                    | Admin — `{ "enabled": boolean }`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `POST`   | `/api/monitor/[linkId]`                  | Autenticado — requiere perfil CURP/celular (**428** si falta). Si el enlace tiene `supportsAutomatedVerification`, ejecuta Playwright y actualiza la fila; si no, **422** sin abrir navegador. Éxito: **200** `{ ok, patternId, result, link }`. Fallo de ejecución: **500** `{ error, errorDetail? }` (mensaje legible + detalle técnico); se persiste en `MonitorVerificationLog` y en `CompanyLink.lastMonitorError*`. Query opcional `?bulk=1`: fuerza **headless** aunque `PLAYWRIGHT_HEADED=true` (la masiva usa `POST /api/monitor/bulk`). |
+| `POST`   | `/api/monitor/bulk`                      | Autenticado — cuerpo `{ "linkIds": string[] }` (máx. 150). Un solo Chromium y contexto compartido; serie + **SSE** (`text/event-stream`): `start`, `item_start` (enlace en curso), `item` (cada resultado; `error` con mensaje legible si `ok: false`), `done` (opcional `cancelled: true` si se abortó la petición). Cada ítem escribe historial en Neon con el mismo `batchId`. Siempre headless; pausa mismo hostname vía `MONITOR_BULK_DELAY_MS`.                                                                                             |
+| `PATCH`  | `/api/company-links/[linkId]`            | Autenticado — ajuste manual de estado                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `GET`    | `/api/company-links/[linkId]/screenshot` | Autenticado — PNG de la última verificación (si existe `reviewScreenshotAt`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Patrones de monitoreo
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Los patrones viven en `src/monitoring/patterns/`. El registro en `src/monitoring/index.ts` elige un patrón por **URL** (`matchesUrl`) o por **nombre de compañía** (`matches`) y cae en **generic** si no hay coincidencia. Solo los patrones con `supportsAutomatedVerification: true` disparan Playwright desde el botón «Verificar»; el resto se revisa manualmente en el dashboard. Amplía con selectores y lógica por operador cuando conozcas cada portal.
 
-## Deploy on Vercel
+## Documentación
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Doc                                                          | Descripción                                        |
+| ------------------------------------------------------------ | -------------------------------------------------- |
+| [`docs/PRD.md`](docs/PRD.md)                                 | Producto, objetivo y alcance                       |
+| [`docs/PHASES.md`](docs/PHASES.md)                           | Fases de desarrollo — fuente de verdad de progreso |
+| [`docs/ENV.md`](docs/ENV.md)                                 | Variables de entorno detalladas                    |
+| [`docs/AVISO_PRIVACIDAD.md`](docs/AVISO_PRIVACIDAD.md)       | Base legal/operativa para tratar CURP y celular    |
+| [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md)                   | Schema y modelo de datos                           |
+| [`docs/TECH_STACK.md`](docs/TECH_STACK.md)                   | Stack tecnológico                                  |
+| [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md)               | Flujo de contribución                              |
+| [`docs/TESTING.md`](docs/TESTING.md)                         | Estrategia de testing                              |
+| [`docs/MONITORING_PATTERNS.md`](docs/MONITORING_PATTERNS.md) | Cómo funcionan y agregar patrones                  |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Notas
+
+- El sitio del CRT puede devolver **403** a clientes simples; por eso el ingest usa Playwright.
+- Las capturas de verificación se guardan en **`data/review-screenshots/`** (local / servidor con disco). En Vercel serverless no son persistentes: usar almacenamiento externo si despliegas ahí.
+- El ingest **filtra** enlaces `*.gob.mx` y rutas típicas de pie de página; para tablas, el nombre de compañía sale de la **primera columna con texto válido** antes del enlace (se ignoran índices numéricos y ruido de UI como selectores `[class*="title"]`).
+- Despliegue serverless (p. ej. Vercel) no es adecuado para Playwright. Ver `docs/PHASES.md` — Fase 2 para opciones de deployment en producción.
+
+## Licencia
+
+Privado / uso interno.

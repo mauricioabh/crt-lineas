@@ -1,0 +1,5 @@
+{
+  "hooks": {
+    "pre-tool-call": ".cursor/hooks/pre-tool-call.js"
+  }
+}

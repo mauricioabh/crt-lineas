@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  enabled   Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  links     CompanyLink[]
+}
+
+model CompanyLink {
+  id             String    @id @default(cuid())
+  companyId      String
+  url            String
+  label          String
+  /** Set on CRT ingest from `linkSupportsAutomatedVerification`; mirrors code registry. */
+  hasVerificationProtocol Boolean @default(false)
+  company        Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  monitorLogs    MonitorVerificationLog[]
+  userResults    UserCompanyLinkResult[]
+
+  @@unique([companyId, url])
+  @@index([companyId])
+}
+
+/** Resultado de verificación por usuario × link. Un usuario puede tener su propio estado. */
+model UserCompanyLinkResult {
+  id             String    @id @default(cuid())
+  userId         String
+  linkId         String
+  link           CompanyLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  hasActiveLines Boolean?
+  isReviewed     Boolean   @default(false)
+  isManualReview Boolean   @default(false)
+  lastReviewedAt DateTime?
+  reviewNotes    String?
+  reviewScreenshotAt    DateTime?
+  reviewScreenshotUtKey String?   @db.Text
+  lastMonitorErrorAt      DateTime?
+  lastMonitorErrorMessage String?  @db.Text
+  lastMonitorErrorDetail  String?  @db.Text
+
+  @@unique([userId, linkId])
+  @@index([userId])
+  @@index([linkId])
+}
+
+/** CURP y celular del usuario (cifrados en reposo con AES-256-GCM en aplicación). */
+model UserVerificationProfile {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  curpEnc                 String   @db.Text
+  phoneEnc                String   @db.Text
+  privacyNoticeVersion    String?
+  privacyNoticeAcceptedAt DateTime?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+
+/** Historial de intentos de verificación automática (éxito o fallo). */
+model MonitorVerificationLog {
+  id                 String   @id @default(cuid())
+  linkId             String
+  userId             String?
+  link               CompanyLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  success            Boolean
+  userFacingMessage  String   @db.Text
+  technicalDetail    String?  @db.Text
+  patternId          String?
+  /** Mismo UUID para todos los ítems de una corrida `POST /api/monitor/bulk`. */
+  batchId            String?
+  createdAt          DateTime @default(now())
+
+  @@index([linkId])
+  @@index([batchId])
+}

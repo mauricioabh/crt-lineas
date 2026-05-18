@@ -1,0 +1,692 @@
+- generic [active] [ref=e1]:
+  - banner:
+    - navigation [ref=e576]:
+      - generic [ref=e577]:
+        - link "gobierno de mexico" [ref=e579] [cursor=pointer]:
+          - /url: https://www.gob.mx/
+          - img "gobierno de mexico" [ref=e580]
+        - list [ref=e582]:
+          - listitem [ref=e583]:
+            - link "Trámites" [ref=e584] [cursor=pointer]:
+              - /url: https://www.gob.mx/tramites
+          - listitem [ref=e585]:
+            - link "Gobierno" [ref=e586] [cursor=pointer]:
+              - /url: https://www.gob.mx/gobierno
+          - listitem [ref=e587]:
+            - link "Búsqueda " [ref=e588] [cursor=pointer]:
+              - /url: https://www.gob.mx/busqueda
+              - generic [ref=e589]: Búsqueda
+              - generic [ref=e590]: 
+  - generic [ref=e2]:
+    - button "Menú de Accesibilidad" [ref=e3] [cursor=pointer]:
+      - img
+    - navigation [ref=e7]:
+      - list [ref=e11]:
+        - listitem [ref=e12]:
+          - link "Inicio" [ref=e13] [cursor=pointer]:
+            - /url: /Home/Index?xsndjr=d8c1a58b-6036-4323-9f2c-e3e67efa399e
+        - listitem [ref=e14]:
+          - link "Agenda y relatorías" [ref=e15] [cursor=pointer]:
+            - /url: /agenda
+        - listitem [ref=e16]:
+          - link "Planes y Programas" [ref=e17] [cursor=pointer]:
+            - /url: /planes-y-programas
+        - listitem [ref=e18]:
+          - link "Grupos y Comités" [ref=e19] [cursor=pointer]:
+            - /url: /grupos-y-comites
+        - listitem [ref=e20]:
+          - link "Consultas públicas" [ref=e21] [cursor=pointer]:
+            - /url: /consulta-publica
+        - listitem [ref=e22]:
+          - link "Directorio" [ref=e23] [cursor=pointer]:
+            - /url: /directorio-telefonico
+        - listitem [ref=e24]:
+          - link "Soluciones" [ref=e25] [cursor=pointer]:
+            - /url: /soluciones
+        - listitem [ref=e26]:
+          - link "Transparencia" [ref=e27] [cursor=pointer]:
+            - /url: /transparencia
+    - generic [ref=e28]:
+      - navigation "breadcrumb" [ref=e29]:
+        - list [ref=e30]:
+          - listitem [ref=e31]:
+            - link [ref=e32] [cursor=pointer]:
+              - /url: /
+              - img [ref=e33]: 
+          - listitem [ref=e35]:  Plataformas de las compañías telefónicas
+      - generic [ref=e39]:
+        - navigation "Secciones de gestión de líneas" [ref=e40]:
+          - link "Registra" [ref=e41] [cursor=pointer]:
+            - /url: https://portal.crt.gob.mx/gestion-de-lineas-telefonicas-moviles
+          - link "Consulta" [ref=e42] [cursor=pointer]:
+            - /url: https://portal.crt.gob.mx/plataformas-de-consulta-de-las-companias-telefonicas
+          - link "Reporta" [ref=e43] [cursor=pointer]:
+            - /url: https://portal.crt.gob.mx/reporte-fallas-plataforma-registro
+        - paragraph [ref=e44]: Selecciona tu compañía, regístrate y sigue conectado
+        - generic "Buscador de compañías telefónicas" [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - img "Usa tu celular" [ref=e48]
+              - img "Código QR" [ref=e49]
+            - generic [ref=e50]:
+              - searchbox "Encuentra tu compañía telefónica" [ref=e51]
+              - text: 
+              - button "Buscar" [ref=e52] [cursor=pointer]
+        - generic [ref=e53]:
+          - generic [ref=e55]:
+            - heading "Compañías más consultadas" [level=2] [ref=e57]
+            - list [ref=e58]:
+              - listitem [ref=e59] [cursor=pointer]:
+                - link "1 Telcel" [ref=e60]:
+                  - /url: https://registro.telcel.com/vinculatulinea
+                  - generic [ref=e61]: "1"
+                  - generic [ref=e62]: Telcel
+              - listitem [ref=e64] [cursor=pointer]:
+                - link "2 AT&T, Unefon y WIM marca digital AT&T" [ref=e65]:
+                  - /url: https://www.att.com.mx/vinculartulinea/
+                  - generic [ref=e66]: "2"
+                  - generic [ref=e67]: AT&T, Unefon y WIM marca digital AT&T
+              - listitem [ref=e69] [cursor=pointer]:
+                - link "3 Bait" [ref=e70]:
+                  - /url: https://btz.mx/registra
+                  - generic [ref=e71]: "3"
+                  - generic [ref=e72]: Bait
+              - listitem [ref=e74] [cursor=pointer]:
+                - link "4 Teléfonica Movistar" [ref=e75]:
+                  - /url: https://www.movistar.com.mx/vinculatulinea
+                  - generic [ref=e76]: "4"
+                  - generic [ref=e77]: Teléfonica Movistar
+              - listitem [ref=e79] [cursor=pointer]:
+                - link "5 CFE" [ref=e80]:
+                  - /url: https://rnu.altanredes.com/cfeinternet/vinculatulinea
+                  - generic [ref=e81]: "5"
+                  - generic [ref=e82]: CFE
+          - list [ref=e85]:
+            - listitem [ref=e86]:
+              - paragraph [ref=e87]:
+                - button "2y2x 2" [ref=e88] [cursor=pointer]:
+                  - generic [ref=e89]: 2y2x
+                  - generic [ref=e90]: "2"
+            - listitem [ref=e92]:
+              - paragraph [ref=e93]:
+                - button "AI Telecomm 2" [ref=e94] [cursor=pointer]:
+                  - generic [ref=e95]: AI Telecomm
+                  - generic [ref=e96]: "2"
+            - listitem [ref=e98]:
+              - paragraph [ref=e99]:
+                - button "Abafon 2" [ref=e100] [cursor=pointer]:
+                  - generic [ref=e101]: Abafon
+                  - generic [ref=e102]: "2"
+            - listitem [ref=e104]:
+              - paragraph [ref=e105]:
+                - button "Appcel 2" [ref=e106] [cursor=pointer]:
+                  - generic [ref=e107]: Appcel
+                  - generic [ref=e108]: "2"
+            - listitem [ref=e110]:
+              - paragraph [ref=e111]:
+                - button "Abix 2" [ref=e112] [cursor=pointer]:
+                  - generic [ref=e113]: Abix
+                  - generic [ref=e114]: "2"
+            - listitem [ref=e116]:
+              - paragraph [ref=e117]:
+                - button "Abib 2" [ref=e118] [cursor=pointer]:
+                  - generic [ref=e119]: Abib
+                  - generic [ref=e120]: "2"
+            - listitem [ref=e122]:
+              - paragraph [ref=e123]:
+                - button "Addinteli 2" [ref=e124] [cursor=pointer]:
+                  - generic [ref=e125]: Addinteli
+                  - generic [ref=e126]: "2"
+            - listitem [ref=e128]:
+              - link "ADS/Internet para el Bienestar" [ref=e129] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/ipbads/vinculatulinea
+            - listitem [ref=e130]:
+              - link "AhorroCel" [ref=e131] [cursor=pointer]:
+                - /url: https://vinculatulinea.com/Ahorrocel
+            - listitem [ref=e132]:
+              - link "Alestra móvil" [ref=e133] [cursor=pointer]:
+                - /url: https://www.alestramovil.mx/vinculatulinea
+            - listitem [ref=e134]:
+              - link "ALLCE" [ref=e135] [cursor=pointer]:
+                - /url: https://vinculacion.allce.mx/vinculatulinea
+            - listitem [ref=e136]:
+              - link "AT&T, Unefon y WIM marca digital AT&T" [ref=e137] [cursor=pointer]:
+                - /url: https://www.att.com.mx/vinculartulinea/
+            - listitem [ref=e138]:
+              - link "Axios Mobile" [ref=e139] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/axios/vinculatulinea
+            - listitem [ref=e140]:
+              - link "Awan/Internet para el Bienestar" [ref=e141] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/ipbawan/vinculatulinea
+            - listitem [ref=e142]:
+              - link "Bait" [ref=e143] [cursor=pointer]:
+                - /url: https://btz.mx/registra
+            - listitem [ref=e144]:
+              - link "Bestel" [ref=e145] [cursor=pointer]:
+                - /url: https://facturacion.bestel.com.mx
+            - listitem [ref=e146]:
+              - link "Beneleit Móvil" [ref=e147] [cursor=pointer]:
+                - /url: https://beneleit.mx/consultalineas
+            - listitem [ref=e148]:
+              - link "BienCel" [ref=e149] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/biencel/vinculatulinea
+            - listitem [ref=e150]:
+              - paragraph [ref=e151]:
+                - button "Bigcel 2" [ref=e152] [cursor=pointer]:
+                  - generic [ref=e153]: Bigcel
+                  - generic [ref=e154]: "2"
+            - listitem [ref=e156]:
+              - link "Bromovil" [ref=e157] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/Bromovil/vinculatulinea
+            - listitem [ref=e158]:
+              - link "Cablecom" [ref=e159] [cursor=pointer]:
+                - /url: https://facturacion.bestel.com.mx
+            - listitem [ref=e160]:
+              - link "Celsfi" [ref=e161] [cursor=pointer]:
+                - /url: https://vinculacion.celfi.com.mx/buscar
+            - listitem [ref=e162]:
+              - link "CFE" [ref=e163] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/cfeinternet/vinculatulinea
+            - listitem [ref=e164]:
+              - link "Chedraui Móvil" [ref=e165] [cursor=pointer]:
+                - /url: https://vinculatulinea.com/Chedrauimovil
+            - listitem [ref=e166]:
+              - link "Chip Macropay" [ref=e167] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/macropay/vinculatulinea
+            - listitem [ref=e168]:
+              - paragraph [ref=e169]:
+                - button "Chuliphone 2" [ref=e170] [cursor=pointer]:
+                  - generic [ref=e171]: Chuliphone
+                  - generic [ref=e172]: "2"
+            - listitem [ref=e174]:
+              - link "Cool Mobile" [ref=e175] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/coolmobile/vinculatulinea
+            - listitem [ref=e176]:
+              - paragraph [ref=e177]:
+                - button "Comunicaciones Green 2" [ref=e178] [cursor=pointer]:
+                  - generic [ref=e179]: Comunicaciones Green
+                  - generic [ref=e180]: "2"
+            - listitem [ref=e182]:
+              - link "Conecta2" [ref=e183] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/conecta2/vinculatulinea
+            - listitem [ref=e184]:
+              - paragraph [ref=e185]:
+                - button "Conectacel México 2" [ref=e186] [cursor=pointer]:
+                  - generic [ref=e187]: Conectacel México
+                  - generic [ref=e188]: "2"
+            - listitem [ref=e190]:
+              - link "Conec-Rural/Internet para el Bienestar" [ref=e191] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/ipbjrmovil/vinculatulinea
+            - listitem [ref=e192]:
+              - paragraph [ref=e193]:
+                - button "Dalefon 2" [ref=e194] [cursor=pointer]:
+                  - generic [ref=e195]: Dalefon
+                  - generic [ref=e196]: "2"
+            - listitem [ref=e198]:
+              - link "Dialo" [ref=e199] [cursor=pointer]:
+                - /url: https://dialo.mx/vinculatulinea
+            - listitem [ref=e200]:
+              - paragraph [ref=e201]:
+                - button "Diré Movil 2" [ref=e202] [cursor=pointer]:
+                  - generic [ref=e203]: Diré Movil
+                  - generic [ref=e204]: "2"
+            - listitem [ref=e206]:
+              - link "Diri Móvil" [ref=e207] [cursor=pointer]:
+                - /url: https://diri.mx/registrolineas
+            - listitem [ref=e208]:
+              - link "Dua" [ref=e209] [cursor=pointer]:
+                - /url: https://dua.mx/vinculatulinea
+            - listitem [ref=e210]:
+              - link "Exis" [ref=e211] [cursor=pointer]:
+                - /url: https://www.exis.mx/vinculatulinea
+            - listitem [ref=e212]:
+              - paragraph [ref=e213]:
+                - button "ENI Networks 2" [ref=e214] [cursor=pointer]:
+                  - generic [ref=e215]: ENI Networks
+                  - generic [ref=e216]: "2"
+            - listitem [ref=e218]:
+              - link "Fangio Mobile" [ref=e219] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/addomv/vinculatulinea
+            - listitem [ref=e220]:
+              - link "Fedego!" [ref=e221] [cursor=pointer]:
+                - /url: https://fedego.mx/registrolineas
+            - listitem [ref=e222]:
+              - paragraph [ref=e223]:
+                - button "Fibracell 2" [ref=e224] [cursor=pointer]:
+                  - generic [ref=e225]: Fibracell
+                  - generic [ref=e226]: "2"
+            - listitem [ref=e228]:
+              - link "Flash Mobile" [ref=e229] [cursor=pointer]:
+                - /url: https://miflash.mx/vinculatulinea
+            - listitem [ref=e230]:
+              - paragraph [ref=e231]:
+                - button "FRC Mobile 2" [ref=e232] [cursor=pointer]:
+                  - generic [ref=e233]: FRC Mobile
+                  - generic [ref=e234]: "2"
+            - listitem [ref=e236]:
+              - link "Freedompop" [ref=e237] [cursor=pointer]:
+                - /url: https://vinculatulinea.com/Freedompop
+            - listitem [ref=e238]:
+              - link "Gamers" [ref=e239] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/gameplanet/vinculatulinea
+            - listitem [ref=e240]:
+              - link "Gane" [ref=e241] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/gane/vinculatulinea
+            - listitem [ref=e242]:
+              - paragraph [ref=e243]:
+                - button "Glovo Telecom 2" [ref=e244] [cursor=pointer]:
+                  - generic [ref=e245]: Glovo Telecom
+                  - generic [ref=e246]: "2"
+            - listitem [ref=e248]:
+              - paragraph [ref=e249]:
+                - button "Gmovil 2" [ref=e250] [cursor=pointer]:
+                  - generic [ref=e251]: Gmovil
+                  - generic [ref=e252]: "2"
+            - listitem [ref=e254]:
+              - link "Grupo Bitelit" [ref=e255] [cursor=pointer]:
+                - /url: https://rnu.grupobitelit.com/vinculatulinea
+            - listitem [ref=e256]:
+              - paragraph [ref=e257]:
+                - button "Grupo Inten 2" [ref=e258] [cursor=pointer]:
+                  - generic [ref=e259]: Grupo Inten
+                  - generic [ref=e260]: "2"
+            - listitem [ref=e262]:
+              - paragraph [ref=e263]:
+                - button "Hashtag 2" [ref=e264] [cursor=pointer]:
+                  - generic [ref=e265]: Hashtag
+                  - generic [ref=e266]: "2"
+            - listitem [ref=e268]:
+              - link "I AM Abundance" [ref=e269] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/ipbiama/vinculatulinea
+            - listitem [ref=e270]:
+              - link "IENTC Movil" [ref=e271] [cursor=pointer]:
+                - /url: https://movilidad.ientc.net/vinculatulinea
+            - listitem [ref=e272]:
+              - link "Inbtel" [ref=e273] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/addomv/vinculatulinea
+            - listitem [ref=e274]:
+              - link "Infynit" [ref=e275] [cursor=pointer]:
+                - /url: https://vinculate.infynit.mx
+            - listitem [ref=e276]:
+              - link "Inphonity" [ref=e277] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/inphonity/vinculatulinea
+            - listitem [ref=e278]:
+              - link "Interlinked" [ref=e279] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/interlinked/vinculatulinea
+            - listitem [ref=e280]:
+              - paragraph [ref=e281]:
+                - button "Inxel 3" [ref=e282] [cursor=pointer]:
+                  - generic [ref=e283]: Inxel
+                  - generic [ref=e284]: "3"
+            - listitem [ref=e286]:
+              - link "Iusatel" [ref=e287] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/iusatel/vinculatulinea
+            - listitem [ref=e288]:
+              - link "Izzi" [ref=e289] [cursor=pointer]:
+                - /url: https://www.izzi.mx/login
+            - listitem [ref=e290]:
+              - paragraph [ref=e291]:
+                - button "Jrmovil 2" [ref=e292] [cursor=pointer]:
+                  - generic [ref=e293]: Jrmovil
+                  - generic [ref=e294]: "2"
+            - listitem [ref=e296]:
+              - link "Kolors" [ref=e297] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/kolors/vinculatulinea
+            - listitem [ref=e298]:
+              - link "Likephone" [ref=e299] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/vinculacel/vinculatulinea
+            - listitem [ref=e300]:
+              - link "Link Móvil" [ref=e301] [cursor=pointer]:
+                - /url: https://movil.linkteconectamos.com/vinculacion
+            - listitem [ref=e302]:
+              - link "Maya Móvil" [ref=e303] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/mayamovil/vinculatulinea
+            - listitem [ref=e304]:
+              - paragraph [ref=e305]:
+                - button "Maifon 2" [ref=e306] [cursor=pointer]:
+                  - generic [ref=e307]: Maifon
+                  - generic [ref=e308]: "2"
+            - listitem [ref=e310]:
+              - link "Mega Móvil" [ref=e311] [cursor=pointer]:
+                - /url: https://megamovil.mx/vinculatulinea
+            - listitem [ref=e312]:
+              - paragraph [ref=e313]:
+                - button "Mexfon 2" [ref=e314] [cursor=pointer]:
+                  - generic [ref=e315]: Mexfon
+                  - generic [ref=e316]: "2"
+            - listitem [ref=e318]:
+              - link "Miio" [ref=e319] [cursor=pointer]:
+                - /url: https://miio.com.mx/telefonia-registro.html
+            - listitem [ref=e320]:
+              - link "Mirlo" [ref=e321] [cursor=pointer]:
+                - /url: https://mirlo.com/vincularlinea
+            - listitem [ref=e322]:
+              - link "MMXC MOVIL" [ref=e323] [cursor=pointer]:
+                - /url: https://vinculatulinea.mmxcmovil.com.mx
+            - listitem [ref=e324]:
+              - paragraph [ref=e325]:
+                - button "México Móvil 2" [ref=e326] [cursor=pointer]:
+                  - generic [ref=e327]: México Móvil
+                  - generic [ref=e328]: "2"
+            - listitem [ref=e330]:
+              - paragraph [ref=e331]:
+                - button "Mi Móvil 2" [ref=e332] [cursor=pointer]:
+                  - generic [ref=e333]: Mi Móvil
+                  - generic [ref=e334]: "2"
+            - listitem [ref=e336]:
+              - paragraph [ref=e337]:
+                - button "MoBig 2" [ref=e338] [cursor=pointer]:
+                  - generic [ref=e339]: MoBig
+                  - generic [ref=e340]: "2"
+            - listitem [ref=e342]:
+              - paragraph [ref=e343]:
+                - button "Movired 2" [ref=e344] [cursor=pointer]:
+                  - generic [ref=e345]: Movired
+                  - generic [ref=e346]: "2"
+            - listitem [ref=e348]:
+              - paragraph [ref=e349]:
+                - button "MobileArionet 4" [ref=e350] [cursor=pointer]:
+                  - generic [ref=e351]: MobileArionet
+                  - generic [ref=e352]: "4"
+            - listitem [ref=e354]:
+              - link "Mosi" [ref=e355] [cursor=pointer]:
+                - /url: https://vinculacion.mosi.mx/vinculatulinea
+            - listitem [ref=e356]:
+              - paragraph [ref=e357]:
+                - button "Móvil para Todos 4" [ref=e358] [cursor=pointer]:
+                  - generic [ref=e359]: Móvil para Todos
+                  - generic [ref=e360]: "4"
+            - listitem [ref=e362]:
+              - link "Mujer Móvil" [ref=e363] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/JRmovil/vinculatulinea
+            - listitem [ref=e364]:
+              - paragraph [ref=e365]:
+                - button "Netmas 2" [ref=e366] [cursor=pointer]:
+                  - generic [ref=e367]: Netmas
+                  - generic [ref=e368]: "2"
+            - listitem [ref=e370]:
+              - paragraph [ref=e371]:
+                - button "Nabi 2" [ref=e372] [cursor=pointer]:
+                  - generic [ref=e373]: Nabi
+                  - generic [ref=e374]: "2"
+            - listitem [ref=e376]:
+              - paragraph [ref=e377]:
+                - button "Netwey 2" [ref=e378] [cursor=pointer]:
+                  - generic [ref=e379]: Netwey
+                  - generic [ref=e380]: "2"
+            - listitem [ref=e382]:
+              - link "Newww" [ref=e383] [cursor=pointer]:
+                - /url: https://vinculacion.newww.mx
+            - listitem [ref=e384]:
+              - link "Nextor Movil" [ref=e385] [cursor=pointer]:
+                - /url: https://vinculacion.nextormovil.mx
+            - listitem [ref=e386]:
+              - link "Ocean Móvil" [ref=e387] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/oceanmovil/vinculatulinea
+            - listitem [ref=e388]:
+              - paragraph [ref=e389]:
+                - button "On-Link 2" [ref=e390] [cursor=pointer]:
+                  - generic [ref=e391]: On-Link
+                  - generic [ref=e392]: "2"
+            - listitem [ref=e394]:
+              - paragraph [ref=e395]:
+                - button "OUI 2" [ref=e396] [cursor=pointer]:
+                  - generic [ref=e397]: OUI
+                  - generic [ref=e398]: "2"
+            - listitem [ref=e400]:
+              - paragraph [ref=e401]:
+                - button "Othisi Mobile 3" [ref=e402] [cursor=pointer]:
+                  - generic [ref=e403]: Othisi Mobile
+                  - generic [ref=e404]: "3"
+            - listitem [ref=e406]:
+              - link "Orange" [ref=e407] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/ipborange/vinculatulinea
+            - listitem [ref=e408]:
+              - link "OXXO CEL" [ref=e409] [cursor=pointer]:
+                - /url: https://vinculatulinea.com/Oxxocel
+            - listitem [ref=e410]:
+              - link "Oxio" [ref=e411] [cursor=pointer]:
+                - /url: https://verificar.oxiomobile.com/vinculatulinea
+            - listitem [ref=e412]:
+              - link "Pagacel" [ref=e413] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/pagacelmym/vinculatulinea
+            - listitem [ref=e414]:
+              - link "Pantera Mobile/Internet para el Bienestar" [ref=e415] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/ipbpantera/vinculatulinea
+            - listitem [ref=e416]:
+              - paragraph [ref=e417]:
+                - button "Playcell 2" [ref=e418] [cursor=pointer]:
+                  - generic [ref=e419]: Playcell
+                  - generic [ref=e420]: "2"
+            - listitem [ref=e422]:
+              - link "Pillofon" [ref=e423] [cursor=pointer]:
+                - /url: https://pillofon.mx/registrolineas
+            - listitem [ref=e424]:
+              - link "Red Aguila" [ref=e425] [cursor=pointer]:
+                - /url: https://vinculacion.redaguila.com.mx
+            - listitem [ref=e426]:
+              - paragraph [ref=e427]:
+                - button "Red Blak 2" [ref=e428] [cursor=pointer]:
+                  - generic [ref=e429]: Red Blak
+                  - generic [ref=e430]: "2"
+            - listitem [ref=e432]:
+              - link "Red Dog" [ref=e433] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/reddog/vinculatulinea
+            - listitem [ref=e434]:
+              - paragraph [ref=e435]:
+                - button "Red Potencia 2" [ref=e436] [cursor=pointer]:
+                  - generic [ref=e437]: Red Potencia
+                  - generic [ref=e438]: "2"
+            - listitem [ref=e440]:
+              - paragraph [ref=e441]:
+                - button "Redicoppel 2" [ref=e442] [cursor=pointer]:
+                  - generic [ref=e443]: Redicoppel
+                  - generic [ref=e444]: "2"
+            - listitem [ref=e446]:
+              - link "Redphone" [ref=e447] [cursor=pointer]:
+                - /url: https://vinculacion.redphone.com.mx/vinculatulinea
+            - listitem [ref=e448]:
+              - link "Redy Movil" [ref=e449] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/axios/vinculatulinea
+            - listitem [ref=e450]:
+              - link "Retemex" [ref=e451] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/retemex/vinculatulinea
+            - listitem [ref=e452]:
+              - paragraph [ref=e453]:
+                - button "RETESEC 2" [ref=e454] [cursor=pointer]:
+                  - generic [ref=e455]: RETESEC
+                  - generic [ref=e456]: "2"
+            - listitem [ref=e458]:
+              - link "Rex Movil" [ref=e459] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/rexmovil/vinculatulinea
+            - listitem [ref=e460]:
+              - link "Rincel" [ref=e461] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/RINCEL/vinculatulinea
+            - listitem [ref=e462]:
+              - paragraph [ref=e463]:
+                - button "Secure Witness 2" [ref=e464] [cursor=pointer]:
+                  - generic [ref=e465]: Secure Witness
+                  - generic [ref=e466]: "2"
+            - listitem [ref=e468]:
+              - link "Sistcomp" [ref=e469] [cursor=pointer]:
+                - /url: https://vinculatulinea.sistcomp.net
+            - listitem [ref=e470]:
+              - link "Sky" [ref=e471] [cursor=pointer]:
+                - /url: https://misky.sky.com.mx
+            - listitem [ref=e472]:
+              - link "Skycel" [ref=e473] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/skycel/vinculatulinea
+            - listitem [ref=e474]:
+              - link "Sorcel" [ref=e475] [cursor=pointer]:
+                - /url: https://www.soriup.mx/vinculatulinea
+            - listitem [ref=e476]:
+              - paragraph [ref=e477]:
+                - button "Starline 2" [ref=e478] [cursor=pointer]:
+                  - generic [ref=e479]: Starline
+                  - generic [ref=e480]: "2"
+            - listitem [ref=e482]:
+              - paragraph [ref=e483]:
+                - button "Spot 1 2" [ref=e484] [cursor=pointer]:
+                  - generic [ref=e485]: Spot 1
+                  - generic [ref=e486]: "2"
+            - listitem [ref=e488]:
+              - paragraph [ref=e489]:
+                - button "Sfon 2" [ref=e490] [cursor=pointer]:
+                  - generic [ref=e491]: Sfon
+                  - generic [ref=e492]: "2"
+            - listitem [ref=e494]:
+              - link "Telcel" [ref=e495] [cursor=pointer]:
+                - /url: https://registro.telcel.com/vinculatulinea
+            - listitem [ref=e496]:
+              - paragraph [ref=e497]:
+                - button "Telgen 2" [ref=e498] [cursor=pointer]:
+                  - generic [ref=e499]: Telgen
+                  - generic [ref=e500]: "2"
+            - listitem [ref=e502]:
+              - paragraph [ref=e503]:
+                - button "Telmovil 2" [ref=e504] [cursor=pointer]:
+                  - generic [ref=e505]: Telmovil
+                  - generic [ref=e506]: "2"
+            - listitem [ref=e508]:
+              - paragraph [ref=e509]:
+                - button "Telefónica Luna 2" [ref=e510] [cursor=pointer]:
+                  - generic [ref=e511]: Telefónica Luna
+                  - generic [ref=e512]: "2"
+            - listitem [ref=e514]:
+              - link "Teléfonica Movistar" [ref=e515] [cursor=pointer]:
+                - /url: https://www.movistar.com.mx/vinculatulinea
+            - listitem [ref=e516]:
+              - link "Teracel" [ref=e517] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/teracel/vinculatulinea
+            - listitem [ref=e518]:
+              - link "TIC-OMV" [ref=e519] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/wikikatat/vinculatulinea
+            - listitem [ref=e520]:
+              - link "Tokamóvil" [ref=e521] [cursor=pointer]:
+                - /url: https://tokamovil.mx/cumplimiento/registro-de-vinculacion-de-lineas
+            - listitem [ref=e522]:
+              - link "TurboCel" [ref=e523] [cursor=pointer]:
+                - /url: https://turbocel.mx/registrolineas
+            - listitem [ref=e524]:
+              - paragraph [ref=e525]:
+                - button "Turbored 4" [ref=e526] [cursor=pointer]:
+                  - generic [ref=e527]: Turbored
+                  - generic [ref=e528]: "4"
+            - listitem [ref=e530]:
+              - link "Uber Cel" [ref=e531] [cursor=pointer]:
+                - /url: https://vinculatulinea.com/Ubercel
+            - listitem [ref=e532]:
+              - paragraph [ref=e533]:
+                - button "Ultracel/IPB 4" [ref=e534] [cursor=pointer]:
+                  - generic [ref=e535]: Ultracel/IPB
+                  - generic [ref=e536]: "4"
+            - listitem [ref=e538]:
+              - link "Valor Telecomm" [ref=e539] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/valor/vinculatulinea
+            - listitem [ref=e540]:
+              - link "Vasanta" [ref=e541] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/vasanta/vinculatulinea
+            - listitem [ref=e542]:
+              - link "Viasat" [ref=e543] [cursor=pointer]:
+                - /url: https://viasatprepago.com.mx/vinculatulinea
+            - listitem [ref=e544]:
+              - link "Viral Cel" [ref=e545] [cursor=pointer]:
+                - /url: https://www.viralcel.com/vinculacion
+            - listitem [ref=e546]:
+              - link "Virgin Mobile" [ref=e547] [cursor=pointer]:
+                - /url: https://virginmobile.mx/vinculatulinea
+            - listitem [ref=e548]:
+              - link "VivaMX" [ref=e549] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/VIVAMX/vinculatulinea
+            - listitem [ref=e550]:
+              - link "Weex" [ref=e551] [cursor=pointer]:
+                - /url: https://weex.mx/vinculatulinea.html
+            - listitem [ref=e552]:
+              - link "Wiicel" [ref=e553] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/wiicel/vinculatulinea
+            - listitem [ref=e554]:
+              - link "Wiki Katat" [ref=e555] [cursor=pointer]:
+                - /url: https://rnu.altanredes.com/wikikatat/vinculatulinea
+            - listitem [ref=e556]:
+              - paragraph [ref=e557]:
+                - button "Wimotelecom 2" [ref=e558] [cursor=pointer]:
+                  - generic [ref=e559]: Wimotelecom
+                  - generic [ref=e560]: "2"
+            - listitem [ref=e562]:
+              - paragraph [ref=e563]:
+                - button "X-Cel 2" [ref=e564] [cursor=pointer]:
+                  - generic [ref=e565]: X-Cel
+                  - generic [ref=e566]: "2"
+            - listitem [ref=e568]:
+              - link "Yo Mobile" [ref=e569] [cursor=pointer]:
+                - /url: https://yo-mobile-mx.webflow.io/verification
+            - listitem [ref=e570]:
+              - paragraph [ref=e571]:
+                - button "Yobi Telecom 3" [ref=e572] [cursor=pointer]:
+                  - generic [ref=e573]: Yobi Telecom
+                  - generic [ref=e574]: "3"
+  - contentinfo [ref=e591]:
+    - generic [ref=e594]:
+      - img "logo gobierno de méxico" [ref=e596]
+      - generic [ref=e597]:
+        - heading "Enlaces" [level=5] [ref=e599] [cursor=pointer]
+        - list [ref=e602]:
+          - listitem [ref=e603]:
+            - link "Datos abiertos de la SABG" [ref=e604] [cursor=pointer]:
+              - /url: https://data.buengobierno.gob.mx/databuengobierno
+          - listitem [ref=e605]:
+            - link "Marco Jurídico" [ref=e606] [cursor=pointer]:
+              - /url: http://www.ordenjuridico.gob.mx
+          - listitem [ref=e607]:
+            - link "Plataforma Nacional de Transparencia" [ref=e608] [cursor=pointer]:
+              - /url: https://consultapublicamx.plataformadetransparencia.org.mx/vut-web/faces/view/consultaPublica.xhtml#inicio
+          - listitem [ref=e609]:
+            - link "Transparencia para el pueblo" [ref=e610] [cursor=pointer]:
+              - /url: https://transparencia.gob.mx
+          - listitem [ref=e611]:
+            - link "Alerta" [ref=e612] [cursor=pointer]:
+              - /url: https://alertadores.buengobierno.gob.mx/
+      - generic [ref=e613]:
+        - heading "¿Qué es gob.mx?" [level=5] [ref=e615] [cursor=pointer]
+        - generic [ref=e617]:
+          - paragraph [ref=e618]:
+            - text: Es el portal único de trámites, información y participación ciudadana.
+            - link "Leer más" [ref=e619] [cursor=pointer]:
+              - /url: https://www.gob.mx/que-es-gobmx
+          - list [ref=e620]:
+            - listitem [ref=e621]:
+              - link "Portal de datos abiertos" [ref=e622] [cursor=pointer]:
+                - /url: https://datos.gob.mx
+            - listitem [ref=e623]:
+              - link "Declaración de accesibilidad" [ref=e624] [cursor=pointer]:
+                - /url: https://www.gob.mx/accesibilidad
+            - listitem [ref=e625]:
+              - link "Términos y Condiciones" [ref=e626] [cursor=pointer]:
+                - /url: https://www.gob.mx/terminos
+      - generic [ref=e627]:
+        - heading "Denuncia contra servidores públicos" [level=5] [ref=e628]:
+          - link "Denuncia contra servidores públicos" [ref=e629] [cursor=pointer]:
+            - /url: https://sidec.buengobierno.gob.mx/#!/
+        - generic [ref=e630]: Síguenos en
+        - list [ref=e631]:
+          - listitem [ref=e632]:
+            - link "Facebook" [ref=e633] [cursor=pointer]:
+              - /url: https://www.facebook.com/gobmexico
+              - img "Facebook" [ref=e634]
+          - listitem [ref=e635]:
+            - link "Twitter" [ref=e636] [cursor=pointer]:
+              - /url: https://twitter.com/GobiernoMX
+              - img "Twitter" [ref=e637]
+          - listitem [ref=e638]:
+            - link "Instagram" [ref=e639] [cursor=pointer]:
+              - /url: https://www.instagram.com/gobmexico/
+              - img "Instagram" [ref=e640]
+          - listitem [ref=e641]:
+            - link "Youtube" [ref=e642] [cursor=pointer]:
+              - /url: https://www.youtube.com/@gobiernodemexico
+              - img "Youtube" [ref=e643]
+        - list [ref=e644]:
+          - listitem [ref=e645]:
+            - link "logo 079" [ref=e647] [cursor=pointer]:
+              - /url: tel:+079
+              - img "logo 079" [ref=e648]
