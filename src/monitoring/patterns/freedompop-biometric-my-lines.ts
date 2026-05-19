@@ -4,6 +4,15 @@ import type {
   MonitorRunContext,
   MonitorResult,
 } from "../base-pattern";
+import { sanitizeEnvFromUserFacingText } from "@/lib/monitor-error-format";
+
+/** Rutas más lentas en Vercel (Chromium serverless / cold starts). */
+const IS_SERVERLESS_VERCEL = process.env.VERCEL === "1";
+const NAVIGATION_TIMEOUT_MS = IS_SERVERLESS_VERCEL ? 180_000 : 120_000;
+const CURP_FIELD_VISIBLE_MS = IS_SERVERLESS_VERCEL ? 65_000 : 35_000;
+const CONTINUE_BUTTON_VISIBLE_MS = IS_SERVERLESS_VERCEL ? 30_000 : 15_000;
+const WAIT_FOR_MY_LINES_MS = IS_SERVERLESS_VERCEL ? 40_000 : 25_000;
+const CLICK_MY_LINES_MS = IS_SERVERLESS_VERCEL ? 25_000 : 15_000;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -64,7 +73,7 @@ async function ensureOnMyLinesForm(
 ): Promise<void> {
   await page.goto(entryUrl, {
     waitUntil: "domcontentloaded",
-    timeout: 120_000,
+    timeout: NAVIGATION_TIMEOUT_MS,
   });
   await delay(2500);
 
@@ -76,7 +85,7 @@ async function ensureOnMyLinesForm(
       const origin = new URL(u).origin;
       await page.goto(`${origin}/freedompop/welcome`, {
         waitUntil: "domcontentloaded",
-        timeout: 120_000,
+        timeout: NAVIGATION_TIMEOUT_MS,
       });
       await delay(2000);
       u = page.url();
@@ -107,14 +116,16 @@ async function ensureOnMyLinesForm(
       .or(page.getByRole("link", { name: /^My Lines$/i }));
 
     try {
-      await myLines.first().click({ timeout: 15_000 });
+      await myLines.first().click({ timeout: CLICK_MY_LINES_MS });
     } catch {
       await page.goto(u.replace(/\/welcome\/?$/i, "/my-lines"), {
         waitUntil: "domcontentloaded",
-        timeout: 120_000,
+        timeout: NAVIGATION_TIMEOUT_MS,
       });
     }
-    await page.waitForURL(myLinesRe, { timeout: 25_000 }).catch(() => {});
+    await page
+      .waitForURL(myLinesRe, { timeout: WAIT_FOR_MY_LINES_MS })
+      .catch(() => {});
     await delay(1200);
   } else if (!myLinesRe.test(u)) {
     let target = entryUrl;
@@ -122,7 +133,10 @@ async function ensureOnMyLinesForm(
       target = target.replace(/\/welcome\/?$/i, "/my-lines");
     }
     await page
-      .goto(target, { waitUntil: "domcontentloaded", timeout: 120_000 })
+      .goto(target, {
+        waitUntil: "domcontentloaded",
+        timeout: NAVIGATION_TIMEOUT_MS,
+      })
       .catch(() => {});
     await delay(1200);
   }
@@ -142,6 +156,32 @@ export async function runVinculatulineaBiometricMyLines(
     };
   }
 
+  try {
+    return await runBiometricPortalOnce(page, context, curp);
+  } catch (err: unknown) {
+    const snippet =
+      err instanceof Error ? err.message : typeof err === "string" ? err : "";
+    const sanitized = sanitizeEnvFromUserFacingText(snippet).slice(0, 320);
+    console.error("[biometric-pattern] run failed", { url: context.url }, err);
+    const vercelHint = IS_SERVERLESS_VERCEL
+      ? " En Vercel (sin ventana) este portal es más frágil: si reaparece, use revisión manual o ejecute desde local con PLAYWRIGHT_HEADED=true."
+      : "";
+    return {
+      hasActiveLines: null,
+      notes:
+        sanitized.length > 0
+          ? `Portal biométrico: automatización incompleta (${sanitized}). Revise manualmente.${vercelHint}`
+          : `Portal biométrico: la automatización no pudo terminar (${err instanceof Error ? err.name : "error"}). Revise manualmente.${vercelHint}`,
+      isManualReview: true,
+    };
+  }
+}
+
+async function runBiometricPortalOnce(
+  page: Page,
+  context: MonitorRunContext,
+  curp: string,
+): Promise<MonitorResult> {
   await ensureOnMyLinesForm(page, context.url);
 
   const regimeSelect = page.locator("select").first();
@@ -162,13 +202,19 @@ export async function runVinculatulineaBiometricMyLines(
     .or(page.getByPlaceholder(/curp|passport|AAAA/i))
     .first();
 
-  await idInput.waitFor({ state: "visible", timeout: 35_000 });
+  await idInput.waitFor({
+    state: "visible",
+    timeout: CURP_FIELD_VISIBLE_MS,
+  });
   await idInput.clear().catch(() => {});
   await idInput.fill(curp);
   await idInput.press("Tab").catch(() => {});
 
   const continueBtn = page.getByRole("button", { name: /^Continue$/i }).first();
-  await continueBtn.waitFor({ state: "visible", timeout: 15_000 });
+  await continueBtn.waitFor({
+    state: "visible",
+    timeout: CONTINUE_BUTTON_VISIBLE_MS,
+  });
   await continueBtn.scrollIntoViewIfNeeded().catch(() => {});
 
   let clicked = false;
@@ -354,6 +400,32 @@ export const oxxoCelBiometricMyLinesPattern: CompanyPattern = {
   id: "oxxo-cel-biometric-my-lines",
   matches: (companyName: string) => /oxxo\s*cel/i.test(companyName),
   matchesUrl: matchesOxxoCelBiometricMyLinesUrl,
+  supportsAutomatedVerification: true,
+  run: runVinculatulineaBiometricMyLines,
+};
+
+// ── AI Telecomm (vinculatulinea.com/aitelecomm u homólogos) ───────────────────
+
+export function matchesAiTelecommBiometricMyLinesUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.toLowerCase().replace(/^www\./, "");
+    if (host !== "vinculatulinea.com") return false;
+    const p = u.pathname;
+    return (
+      /\/aitelecomm\/(my-lines|welcome)/i.test(p) ||
+      /^\/aitelecomm\/?$/i.test(p) ||
+      /\/ai-?telecomm/i.test(p)
+    );
+  } catch {
+    return false;
+  }
+}
+
+export const aiTelecommBiometricMyLinesPattern: CompanyPattern = {
+  id: "ai-telecomm-biometric-my-lines",
+  matches: (companyName: string) => /^ai\s*telecomm$/i.test(companyName.trim()),
+  matchesUrl: matchesAiTelecommBiometricMyLinesUrl,
   supportsAutomatedVerification: true,
   run: runVinculatulineaBiometricMyLines,
 };

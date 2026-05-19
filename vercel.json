@@ -3,11 +3,13 @@
   "functions": {
     "src/app/api/monitor/**/*.ts": {
       "maxDuration": 300,
-      "memory": 2048
+      "memory": 2048,
+      "includeFiles": "node_modules/@sparticuz/chromium/**"
     },
     "src/app/api/ingest/route.ts": {
       "maxDuration": 300,
-      "memory": 2048
+      "memory": 2048,
+      "includeFiles": "node_modules/@sparticuz/chromium/**"
     }
   }
 }
