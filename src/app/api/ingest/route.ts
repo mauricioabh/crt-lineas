@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { chromium } from "playwright";
+import { launchChromium } from "@/lib/playwright-launch";
 import { requireAdminUser } from "@/lib/auth";
 import { scrapeCrtCompanies } from "@/lib/crt-ingest";
 import { prisma } from "@/lib/db";
@@ -20,8 +20,9 @@ export async function POST() {
     throw e;
   }
 
-  const headed = process.env.PLAYWRIGHT_HEADED === "true";
-  const browser = await chromium.launch({ headless: !headed });
+  const headed =
+    process.env.PLAYWRIGHT_HEADED === "true" && process.env.VERCEL !== "1";
+  const browser = await launchChromium({ headless: !headed });
   try {
     const page = await browser.newPage();
     const scraped = await scrapeCrtCompanies(page);

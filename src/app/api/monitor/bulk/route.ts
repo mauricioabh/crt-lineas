@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { chromium, type Browser, type BrowserContext } from "playwright";
+import type { Browser, BrowserContext } from "playwright";
+import { launchChromium } from "@/lib/playwright-launch";
 import { requireUserId } from "@/lib/auth";
 import { requireMonitorCredentials } from "@/lib/verification-profile";
 import { prisma } from "@/lib/db";
@@ -258,7 +259,7 @@ export async function POST(request: Request) {
           }
 
           if (!browser) {
-            browser = await chromium.launch({ headless: true });
+            browser = await launchChromium({ headless: true });
             context = await browser.newContext();
           }
 

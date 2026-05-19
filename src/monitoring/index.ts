@@ -17,6 +17,7 @@ import {
   oxxoCelBiometricMyLinesPattern,
   wimotelecomBiometricMyLinesPattern,
   yobiTelecomBiometricMyLinesPattern,
+  aiTelecommBiometricMyLinesPattern,
 } from "./patterns/freedompop-biometric-my-lines";
 import { genericPattern } from "./patterns/generic";
 import { movistarPattern } from "./patterns/movistar";

@@ -1,5 +1,5 @@
 /**
- * Errores de ejecuci?n Playwright en verificaci?n: mensaje corto para UI y detalle para consola / modal.
+ * Errores de ejecución Playwright en verificación: mensaje corto para UI y detalle para consola / modal.
  */
 
 const ENV_VAR_NAME_RE =
@@ -11,8 +11,8 @@ export function sanitizeEnvFromUserFacingText(text: string): string {
   if (!text) return text;
   return text
     .replace(ENV_ASSIGNMENT_RE, "")
-    .replace(ENV_VAR_NAME_RE, "la configuraci?n del servidor")
-    .replace(/\.env\.local/gi, "la configuraci?n del servidor")
+    .replace(ENV_VAR_NAME_RE, "la configuración del servidor")
+    .replace(/\.env\.local/gi, "la configuración del servidor")
     .replace(/\(\s*\)/g, "")
     .replace(/\s{2,}/g, " ")
     .trim();
@@ -56,27 +56,34 @@ export function formatMonitorRunError(err: unknown): {
   const lower = msg.toLowerCase();
 
   let userMessage =
-    "No se pudo completar la verificaci?n autom?tica. Intente de nuevo o revise el enlace en el CRT.";
+    "No se pudo completar la verificación automática. Intente de nuevo o revise el enlace en el CRT.";
 
-  if (lower.includes("timeout") && lower.includes("exceeded")) {
+  if (
+    lower.includes("executable doesn't exist") ||
+    lower.includes("failed to launch") ||
+    lower.includes("browserType.launch")
+  ) {
     userMessage =
-      "El portal tard? demasiado o no mostr? el formulario esperado. Compruebe que la URL sea la correcta, que el sitio est? disponible y que el flujo del operador no haya cambiado.";
+      "No se pudo iniciar el navegador en el servidor. Si la app está en Vercel, confirme que el despliegue incluye soporte Playwright (Chromium serverless).";
+  } else if (lower.includes("timeout") && lower.includes("exceeded")) {
+    userMessage =
+      "El portal tardó demasiado o no mostró el formulario esperado. Compruebe que la URL sea la correcta, que el sitio esté disponible y que el flujo del operador no haya cambiado.";
   } else if (
     lower.includes("net::err") ||
     (lower.includes("navigation") && lower.includes("failed"))
   ) {
-    userMessage = "No se pudo abrir el portal (fallo de red o de navegaci?n).";
+    userMessage = "No se pudo abrir el portal (fallo de red o de navegación).";
   } else if (
     lower.includes("target page, context or browser has been closed")
   ) {
     userMessage =
-      "La sesi?n del navegador se cerr? antes de terminar. Intente de nuevo.";
+      "La sesión del navegador se cerró antes de terminar. Intente de nuevo.";
   } else if (lower.includes("strict mode violation")) {
     userMessage =
-      "Hay varios elementos en la p?gina que coinciden con lo que el robot esperaba. Hace falta ajustar el protocolo de verificaci?n.";
+      "Hay varios elementos en la página que coinciden con lo que el robot esperaba. Hace falta ajustar el protocolo de verificación.";
   } else if (
     lower.includes("no_automated") ||
-    msg.includes("protocolo de verificaci?n automatizado")
+    msg.includes("protocolo de verificación automatizado")
   ) {
     userMessage = msg;
   }
