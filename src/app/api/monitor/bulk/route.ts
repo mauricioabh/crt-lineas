@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { Browser, BrowserContext } from "playwright";
+import { parseJsonBody } from "@/lib/api/validate";
+import { MonitorBulkBodySchema } from "@/lib/openapi/schemas";
 import { launchChromium } from "@/lib/playwright-launch";
 import { requireUserId } from "@/lib/auth";
 import { requireMonitorCredentials } from "@/lib/verification-profile";
@@ -14,8 +16,6 @@ import { getPattern } from "@/monitoring";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
-
-const MAX_LINK_IDS = 150;
 
 type SsePayload =
   | { type: "start"; total: number }
@@ -112,44 +112,15 @@ export async function POST(request: Request) {
     });
   }
 
-  const rawIds =
-    body &&
-    typeof body === "object" &&
-    "linkIds" in body &&
-    Array.isArray((body as { linkIds: unknown }).linkIds)
-      ? (body as { linkIds: unknown[] }).linkIds
-      : null;
-
-  if (!rawIds) {
-    return new Response(
-      JSON.stringify({ error: "Se requiere { linkIds: string[] }" }),
-      {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+  const parsed = parseJsonBody(MonitorBulkBodySchema, body);
+  if ("error" in parsed) {
+    return new Response(JSON.stringify({ error: parsed.error }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
-  const linkIds = dedupePreserveOrder(
-    rawIds.filter((id): id is string => typeof id === "string"),
-  );
-
-  if (linkIds.length === 0) {
-    return new Response(
-      JSON.stringify({ error: "linkIds no puede estar vacío" }),
-      {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-  }
-
-  if (linkIds.length > MAX_LINK_IDS) {
-    return new Response(
-      JSON.stringify({ error: `Máximo ${MAX_LINK_IDS} enlaces por solicitud` }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
-  }
+  const linkIds = dedupePreserveOrder(parsed.data.linkIds);
 
   const links = await prisma.companyLink.findMany({
     where: { id: { in: linkIds } },

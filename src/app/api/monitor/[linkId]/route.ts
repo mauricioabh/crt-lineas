@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { parseSearchParams } from "@/lib/api/validate";
+import { MonitorSingleQuerySchema } from "@/lib/openapi/schemas";
 import { launchChromium } from "@/lib/playwright-launch";
 import { requireUserId } from "@/lib/auth";
 import { requireMonitorCredentials } from "@/lib/verification-profile";
@@ -41,6 +43,14 @@ export async function POST(
   }
 
   const { linkId } = await context.params;
+  const queryParsed = parseSearchParams(
+    MonitorSingleQuerySchema,
+    new URL(request.url).searchParams,
+  );
+  if ("error" in queryParsed) {
+    return NextResponse.json({ error: queryParsed.error }, { status: 400 });
+  }
+
   const link = await prisma.companyLink.findUnique({
     where: { id: linkId },
     include: { company: true },
@@ -53,7 +63,7 @@ export async function POST(
     return NextResponse.json({ error: "Company disabled" }, { status: 400 });
   }
 
-  const bulkRun = new URL(request.url).searchParams.get("bulk") === "1";
+  const bulkRun = queryParsed.data.bulk === "1";
   /** Verificación masiva (`?bulk=1`): siempre headless. En Vercel no hay modo headed. */
   const headed =
     process.env.PLAYWRIGHT_HEADED === "true" &&

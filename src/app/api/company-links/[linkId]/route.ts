@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
+import { parseJsonBody } from "@/lib/api/validate";
+import { UpdateCompanyLinkBodySchema } from "@/lib/openapi/schemas";
 import { requireUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { authErrorResponse } from "@/lib/http";
-
-type PatchBody = {
-  hasActiveLines?: boolean | null;
-  isManualReview?: boolean;
-  isReviewed?: boolean;
-  notes?: string | null;
-};
 
 export async function PATCH(
   request: Request,
@@ -26,7 +21,17 @@ export async function PATCH(
   }
 
   const { linkId } = await context.params;
-  const body = (await request.json()) as PatchBody;
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+  const parsed = parseJsonBody(UpdateCompanyLinkBodySchema, body);
+  if ("error" in parsed) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
+  const patch = parsed.data;
 
   const data: {
     hasActiveLines?: boolean | null;
@@ -36,22 +41,22 @@ export async function PATCH(
     lastReviewedAt?: Date;
   } = {};
 
-  if ("hasActiveLines" in body) {
-    data.hasActiveLines = body.hasActiveLines ?? null;
+  if ("hasActiveLines" in patch) {
+    data.hasActiveLines = patch.hasActiveLines ?? null;
   }
-  if (typeof body.isManualReview === "boolean") {
-    data.isManualReview = body.isManualReview;
+  if (typeof patch.isManualReview === "boolean") {
+    data.isManualReview = patch.isManualReview;
   }
-  if (typeof body.isReviewed === "boolean") {
-    data.isReviewed = body.isReviewed;
+  if (typeof patch.isReviewed === "boolean") {
+    data.isReviewed = patch.isReviewed;
   }
-  if (body.notes !== undefined) {
-    data.reviewNotes = body.notes;
+  if (patch.notes !== undefined) {
+    data.reviewNotes = patch.notes;
   }
   if (
-    "hasActiveLines" in body ||
-    typeof body.isManualReview === "boolean" ||
-    typeof body.isReviewed === "boolean"
+    "hasActiveLines" in patch ||
+    typeof patch.isManualReview === "boolean" ||
+    typeof patch.isReviewed === "boolean"
   ) {
     data.lastReviewedAt = new Date();
   }
