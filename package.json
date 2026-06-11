@@ -15,6 +15,7 @@
     "db:push": "node --env-file=.env.local node_modules/prisma/build/index.js db push --skip-generate && node --env-file=.env.local node_modules/prisma/build/index.js generate",
     "db:migrate": "node --env-file=.env.local node_modules/prisma/build/index.js migrate dev --skip-generate && node --env-file=.env.local node_modules/prisma/build/index.js generate",
     "db:clear-companies": "node --env-file=.env.local scripts/clear-companies-data.js",
+    "test:auth": "vitest run tests/auth",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -63,6 +64,7 @@
     "prettier": "^3.8.3",
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }
