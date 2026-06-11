@@ -92,6 +92,11 @@ Los patrones viven en `src/monitoring/patterns/`. El registro en `src/monitoring
 - El ingest **filtra** enlaces `*.gob.mx` y rutas típicas de pie de página; para tablas, el nombre de compañía sale de la **primera columna con texto válido** antes del enlace (se ignoran índices numéricos y ruido de UI como selectores `[class*="title"]`).
 - Despliegue serverless (p. ej. Vercel) no es adecuado para Playwright. Ver `docs/PHASES.md` — Fase 2 para opciones de deployment en producción.
 
+## Production practices
+
+- **Pre-commit:** Husky runs lint-staged (`eslint --fix`, `prettier --write`) on staged `*.ts` / `*.tsx`.
+- **Observability:** Sentry planned — set `SENTRY_DSN` in `.env.local` after creating the `crt-lineas` project in Sentry.
+
 ## Licencia
 
 Privado / uso interno.
