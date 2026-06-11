@@ -98,7 +98,7 @@ Los patrones viven en `src/monitoring/patterns/`. El registro en `src/monitoring
 
 - **Pre-commit:** Husky runs lint-staged (`eslint --fix`, `prettier --write`) on staged `*.ts` / `*.tsx`.
 - **API contracts:** Zod schemas for monitor and companies routes → OpenAPI via `@asteasolutions/zod-to-openapi` → Scalar UI at `/api-docs` (spec JSON at `/api/openapi`).
-- **Observability:** Sentry planned — set `SENTRY_DSN` in `.env.local` after creating the `crt-lineas` project in Sentry.
+- **Observability:** `@sentry/nextjs` with PII scrubbing (CURP/credentials headers). Set `SENTRY_DSN` in `.env.local` after creating the `crt-lineas` project in Sentry. Dev probe: `GET /api/debug/sentry` (non-production only).
 
 ## Licencia
 

@@ -32,6 +32,7 @@
     "@clerk/nextjs": "^7.3.1",
     "@prisma/client": "^6.19.3",
     "@scalar/nextjs-api-reference": "^0.9.26",
+    "@sentry/nextjs": "^10.57.0",
     "@sparticuz/chromium": "^147.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

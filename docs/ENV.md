@@ -45,6 +45,17 @@ Cada usuario configura CURP y celular en **`/dashboard/setup`** (API `PUT /api/m
 | `MONITOR_BULK_DELAY_MS`        | Pausa (ms) entre verificaciones consecutivas al **mismo hostname** dentro de `POST /api/monitor/bulk` (un solo Chromium). Reduce riesgo de rate-limit en dominios con muchas operadoras (p. ej. `rnu.altanredes.com`).                                                                                                                                | Opcional (default: `5000`)   |
 | `MONITOR_BULK_ITEM_TIMEOUT_MS` | Tiempo máximo (ms) por ítem en la verificación masiva (`POST /api/monitor/bulk`). Si Playwright no termina dentro de este tiempo, el ítem se cancela automáticamente y se guarda como error en BD; la verificación masiva continúa con el siguiente ítem. `0` deshabilita el límite.                                                                  | Opcional (default: `20000`)  |
 
+## Sentry (observabilidad)
+
+| Variable            | Descripción                                                                  | Requerida |
+| ------------------- | ---------------------------------------------------------------------------- | --------- |
+| `SENTRY_DSN`        | DSN del proyecto `crt-lineas` en [sentry.io](https://sentry.io)              | Opcional  |
+| `SENTRY_ORG`        | Slug de la org en Sentry (subida de source maps en CI/Vercel)                | Opcional  |
+| `SENTRY_PROJECT`    | Nombre del proyecto (default: `crt-lineas`)                                  | Opcional  |
+| `SENTRY_AUTH_TOKEN` | Token de auth para upload de source maps en build (solo CI/Vercel, no local) | Opcional  |
+
+Sin `SENTRY_DSN`, el SDK queda deshabilitado. Los eventos pasan por scrubbing de CURP, teléfono y cabeceras sensibles (`src/lib/sentry-config.ts`). En desarrollo, `GET /api/debug/sentry` envía un error de prueba (404 en producción).
+
 ## Capturas del monitor (UploadThing)
 
 | Variable            | Descripción                                                                                                                                                                                                                                                                                                                                                                                               | Requerida |
