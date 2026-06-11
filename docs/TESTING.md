@@ -1,6 +1,14 @@
 # Testing — crt-lineas
 
-> Estado actual: sin tests automatizados. Ver Fase 4 en `docs/PHASES.md`.
+> API authorization tests live in `tests/auth/` (`npm run test:auth`). E2E and broader unit coverage remain planned — see Fase 4 in `docs/PHASES.md`.
+
+## API authorization tests (Vitest)
+
+| Script              | Scope                                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| `npm run test:auth` | Non-admin blocked from `POST /api/ingest`; company-link review/screenshot scoped by Clerk `userId` |
+
+Mocks `@/lib/auth` and Prisma — no Neon or Playwright required in CI.
 
 ## Plan de testing
 

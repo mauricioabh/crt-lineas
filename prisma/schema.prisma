@@ -82,3 +82,41 @@ model MonitorVerificationLog {
   @@index([linkId])
   @@index([batchId])
 }
+
+/** Corrida masiva de verificación Playwright (Inngest + SSE). */
+model MonitorBulkJob {
+  id        String   @id @default(cuid())
+  userId    String
+  batchId   String   @unique @default(uuid())
+  status    String   @default("pending") // pending | running | completed | cancelled | failed
+  total     Int
+  okCount   Int      @default(0)
+  failCount Int      @default(0)
+  cancelled Boolean  @default(false)
+  fatalError String? @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items     MonitorBulkJobItem[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+/** Ítem de una corrida masiva; actualizado por funciones Inngest. */
+model MonitorBulkJobItem {
+  id          String   @id @default(cuid())
+  jobId       String
+  job         MonitorBulkJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  linkId      String
+  index       Int
+  companyName String   @default("")
+  status      String   @default("pending") // pending | running | succeeded | failed | skipped
+  ok          Boolean?
+  error       String?  @db.Text
+  patternId   String?
+  attempt     Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@index([jobId])
+  @@index([jobId, status])
+}
