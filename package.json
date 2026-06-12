@@ -16,6 +16,8 @@
     "db:migrate": "node --env-file=.env.local node_modules/prisma/build/index.js migrate dev --skip-generate && node --env-file=.env.local node_modules/prisma/build/index.js generate",
     "db:clear-companies": "node --env-file=.env.local scripts/clear-companies-data.js",
     "test:auth": "vitest run tests/auth",
+    "test:observability": "node scripts/sentry-probe.mjs",
+    "test:sentry-probe": "npm run test:observability",
     "prepare": "husky"
   },
   "lint-staged": {

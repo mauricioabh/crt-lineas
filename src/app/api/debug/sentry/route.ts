@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 /** Dev-only probe — throws a test error visible in Sentry when SENTRY_DSN is set. */
 export async function GET() {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.VERCEL_ENV === "production") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
   Sentry.captureException(new Error("CRT Líneas Sentry test error"));
