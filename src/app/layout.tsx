@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
+import { rootLayoutMetadata } from "@/lib/seo/metadata";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,10 +13,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "CRT Líneas — Monitoreo",
-  description: "Monitoreo de plataformas de compañías telefónicas (CRT México)",
-};
+export const metadata = rootLayoutMetadata();
 
 export default function RootLayout({
   children,
