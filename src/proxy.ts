@@ -3,7 +3,13 @@ import { NextResponse } from "next/server";
 
 import { getAfterAuthRedirectUrl } from "@/lib/auth-redirect-url";
 
-const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/api/inngest",
+  "/api/debug/sentry",
+]);
 
 export default clerkMiddleware(async (auth, request) => {
   const { userId } = await auth();
