@@ -12,6 +12,12 @@ function delay(ms: number) {
   });
 }
 
+/** Timeout de acciones Playwright (ms), configurable con MONITOR_ACTION_TIMEOUT_MS. */
+function actionTimeoutMs(): number {
+  const raw = Number(process.env.MONITOR_ACTION_TIMEOUT_MS ?? 30_000);
+  return Number.isFinite(raw) && raw > 0 ? raw : 30_000;
+}
+
 /** Persona portal on Altán RNU, e.g. https://rnu.altanredes.com/2y2x/vinculatulinea */
 export function matchesAltanRnuUrl(url: string): boolean {
   try {
@@ -177,12 +183,17 @@ export async function runAltanRnu(
     waitUntil: "domcontentloaded",
     timeout: 120_000,
   });
-  await delay(800);
-
+  // El portal es una SPA: `domcontentloaded` no garantiza que el bundle haya
+  // montado/hidratado el botón. Espera a la red inactiva (best-effort) y luego
+  // a que «Continuar» esté visible antes de clicar, en vez de un delay fijo.
   await page
-    .getByRole("button", { name: /^Continuar$/i })
-    .first()
-    .click();
+    .waitForLoadState("networkidle", { timeout: 15_000 })
+    .catch(() => {});
+
+  const continuar = page.getByRole("button", { name: /^Continuar$/i }).first();
+  await continuar.waitFor({ state: "visible", timeout: 90_000 });
+  await continuar.scrollIntoViewIfNeeded();
+  await continuar.click({ timeout: actionTimeoutMs() });
 
   const curpInput = page
     .getByLabel(/CURP/i)
@@ -213,7 +224,12 @@ export async function runAltanRnu(
   await phoneInput.waitFor({ state: "visible", timeout: 15_000 });
   await phoneInput.fill(phone);
 
-  await page.getByRole("button", { name: /^Continuar$/i }).click();
+  const continuarSubmit = page
+    .getByRole("button", { name: /^Continuar$/i })
+    .first();
+  await continuarSubmit.waitFor({ state: "visible", timeout: 90_000 });
+  await continuarSubmit.scrollIntoViewIfNeeded();
+  await continuarSubmit.click({ timeout: actionTimeoutMs() });
 
   const deadline = Date.now() + 25_000;
   while (Date.now() < deadline) {
