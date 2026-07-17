@@ -2,6 +2,8 @@
 
 Los patrones de monitoreo definen cómo se verifica el estado de líneas en el portal de cada operadora.
 
+> **Dónde corren:** los patrones (`src/monitoring/**`) se ejecutan en el **worker Hetzner** (Playwright/Chromium), no en Vercel. El worker importa `src/monitoring/**` como código compartido vía el alias `@/`, así que agregar o modificar un patrón queda disponible en el worker sin reimplementarlo. Vercel solo encola los jobs en Inngest.
+
 ## Arquitectura
 
 ```

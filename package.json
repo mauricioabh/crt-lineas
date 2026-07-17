@@ -37,7 +37,6 @@
     "@prisma/client": "^6.19.3",
     "@scalar/nextjs-api-reference": "^0.9.26",
     "@sentry/nextjs": "^10.57.0",
-    "@sparticuz/chromium": "^147.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
@@ -69,6 +68,7 @@
     "prettier": "^3.8.3",
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5",
     "vitest": "^3.2.4"
   }
