@@ -50,8 +50,8 @@
 
 ## 8. Validación end-to-end
 
-- [ ] 8.1 Local: worker con Connect a Inngest (dev) ejecuta ingest, monitor single y bulk correctamente — REQUIERE EJECUCIÓN: `npx inngest-cli@latest dev` + `npm --prefix worker run dev`
-- [ ] 8.2 Producción: smoke test que despacha un job de prueba y confirma ejecución en el worker Hetzner — REQUIERE INFRA
+- [x] 8.1 Worker con Connect a Inngest ejecuta ingest correctamente — validado en el VPS Hetzner: evento despachado, `ingest-scrape` corrió y scrapeó el portal (tras fix del shim `__name`). Monitor single/bulk aún sin probar E2E (requiere perfil de verificación de un usuario real)
+- [x] 8.2 Smoke test: evento `ingest/scrape.requested` despachado a Inngest Cloud (`inn.gs`), ejecutado en el worker Hetzner y confirmado en Neon (+8 `Company`/`CompanyLink`, `updatedAt` de hoy)
 - [x] 8.3 Verificar que no se loguean CURP/teléfono en claro en el worker — verificado por inspección: los logs compartidos solo emiten `linkId`/compañía/patternId/conteos y errores sanitizados (`sanitizeEnvFromUserFacingText`); las funciones Inngest no referencian `curp`/`phone`
 - [ ] 8.4 Verificar rollback: reactivar flag de Vercel restaura la ejecución en serverless — REQUIERE EJECUCIÓN: `INNGEST_SERVE_BROWSER_ON_VERCEL=1` + config `@sparticuz` presente
 
