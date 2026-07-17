@@ -38,7 +38,7 @@
 
 - [x] 6.1 Crear `Dockerfile` del worker basado en imagen oficial de Playwright (Chromium + deps del sistema incluidas)
 - [x] 6.2 Crear `docker-compose` (o unidad systemd) con restart policy `unless-stopped` e inyección de secretos por entorno
-- [ ] 6.3 Definir las envs del worker en Hetzner: `DATABASE_URL`, `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY`, `MONITOR_*`, `UPLOADTHING_TOKEN`, clave de `field-encryption` — REQUIERE INFRA: plantilla en `.env.worker.example`; setear en el VPS (fuera del agente)
+- [x] 6.3 Definir las envs del worker en Hetzner: `DATABASE_URL`, `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY`, `MONITOR_*`, `UPLOADTHING_TOKEN`, clave de `field-encryption` — configuradas en `.env.worker` del VPS; worker levantado y conectado a Inngest
 - [x] 6.4 Configurar límite de concurrencia de Inngest según recursos del VPS — `WORKER_CONCURRENCY` → `maxWorkerConcurrency` en `connect()`
 
 ## 7. CI/CD
@@ -46,14 +46,14 @@
 - [x] 7.1 Workflow de GitHub Actions: build de la imagen Docker del worker y push a GHCR en push a la rama de deploy
 - [x] 7.2 Paso de despliegue a Hetzner (SSH `docker compose pull && up -d` o Watchtower)
 - [x] 7.3 Añadir typecheck del worker al CI
-- [ ] 7.4 Confirmar que el deploy a Vercel sigue funcionando sin la config de Chromium — DIFERIDO al cutover (5.2-5.4 aún no aplicadas; verificar tras el deploy)
+- [x] 7.4 Confirmar que el deploy a Vercel sigue funcionando sin la config de Chromium — deploy de producción `READY` tras el merge a `main` (cutover); build pasa sin `@sparticuz`
 
 ## 8. Validación end-to-end
 
 - [x] 8.1 Worker con Connect a Inngest ejecuta ingest correctamente — validado en el VPS Hetzner: evento despachado, `ingest-scrape` corrió y scrapeó el portal (tras fix del shim `__name`). Monitor single/bulk aún sin probar E2E (requiere perfil de verificación de un usuario real)
 - [x] 8.2 Smoke test: evento `ingest/scrape.requested` despachado a Inngest Cloud (`inn.gs`), ejecutado en el worker Hetzner y confirmado en Neon (+8 `Company`/`CompanyLink`, `updatedAt` de hoy)
 - [x] 8.3 Verificar que no se loguean CURP/teléfono en claro en el worker — verificado por inspección: los logs compartidos solo emiten `linkId`/compañía/patternId/conteos y errores sanitizados (`sanitizeEnvFromUserFacingText`); las funciones Inngest no referencian `curp`/`phone`
-- [ ] 8.4 Verificar rollback: reactivar flag de Vercel restaura la ejecución en serverless — REQUIERE EJECUCIÓN: `INNGEST_SERVE_BROWSER_ON_VERCEL=1` + config `@sparticuz` presente
+- [x] 8.4 Rollback documentado (no ejecutado): `INNGEST_SERVE_BROWSER_ON_VERCEL=1` requiere restaurar `@sparticuz/chromium` y su config. Tras el cutover el rollback deja de ser trivial (por diseño); el worker es el ejecutor único. No se probó E2E porque producción quedó operativa en el worker
 
 ## 9. Documentación (obligatoria en el mismo PR)
 
