@@ -32,6 +32,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Typecheck worker
+        run: npx tsc --noEmit -p worker/tsconfig.json
+
       - name: Lint
         run: npm run lint
 

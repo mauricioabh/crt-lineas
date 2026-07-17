@@ -116,5 +116,3 @@ export const monitorLinkVerify = inngest.createFunction(
     throw new Error(result.error ?? "Monitor verification failed");
   },
 );
-
-export const functions = [monitorBulkStart, monitorLinkVerify];

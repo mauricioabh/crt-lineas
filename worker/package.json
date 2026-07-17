@@ -1,0 +1,12 @@
+{
+  "name": "crt-lineas-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Worker persistente de Playwright/Chromium (Hetzner) que consume los jobs de navegador de Inngest (scraping CRT y verificación por CURP). Reutiliza la lógica compartida de src/ vía el alias @/.",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  }
+}

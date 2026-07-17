@@ -30,18 +30,20 @@
 
 **Objetivo**: Hacer el app accesible en producción con Playwright funcional.
 
-**Decisión de arquitectura requerida** (ver opciones en `docs/PRD.md`):
+**Estrategia elegida: Opción B — Vercel + worker externo (Hetzner) vía Inngest** (ver `openspec/changes/extract-playwright-worker-hetzner`).
 
-### Opción A: Railway / Render / Fly.io (recomendada)
+### Opción A: Railway / Render / Fly.io
 
 - Desplegar la app completa en un servidor Node persistente
 - Playwright corre sin restricciones (no serverless)
 - Costo: ~$5-20/mes según el proveedor
 
-### Opción B: Vercel + servidor externo
+### ✅ Opción B: Vercel + worker externo (ELEGIDA)
 
-- App en Vercel, `/api/ingest` y `/api/monitor` hacen webhook a un servidor VPS con Playwright
-- Más complejo pero separa concerns
+- App en Vercel (UI/auth/API ligera); el worker Playwright/Chromium corre en el VPS Hetzner.
+- **Inngest** es el transporte único: Vercel encola eventos (`ingest/scrape.requested`, `monitor/bulk.started`) y el worker los consume vía **Inngest Connect** (no webhooks HTTP ad-hoc).
+- Código compartido en `worker/` (importa `src/` con alias `@/`), sin divergencia de patrones.
+- Cutover pendiente: retirar `@sparticuz/chromium` + config de `vercel.json`/`next.config.ts` y poner `INNGEST_SERVE_BROWSER_ON_VERCEL=0` tras desplegar el worker.
 
 ### Opción C: `@sparticuz/chromium`
 

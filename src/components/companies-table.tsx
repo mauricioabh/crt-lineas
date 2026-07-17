@@ -125,6 +125,28 @@ function shiftCompleteBulkSseEvents(buffer: string): {
   return { events, rest };
 }
 
+/** Lee un cuerpo SSE de monitor y entrega cada evento parseado a `onEvent`. */
+async function consumeMonitorSse(
+  body: ReadableStream<Uint8Array>,
+  onEvent: (ev: BulkMonitorSseEvent) => void,
+): Promise<void> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let incomplete = "";
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) {
+      break;
+    }
+    incomplete += decoder.decode(value, { stream: true });
+    const { events, rest } = shiftCompleteBulkSseEvents(incomplete);
+    incomplete = rest;
+    for (const ev of events) {
+      onEvent(ev);
+    }
+  }
+}
+
 /** Columnas de datos (sin la casilla de selección masiva). */
 type DataColumnId =
   | "num"
@@ -791,9 +813,8 @@ export function CompaniesTable({
         }
         setBanner({
           type: "ok",
-          text: "Lista actualizada desde el CRT.",
+          text: "Sincronización con el CRT encolada. Corre en segundo plano en el worker; la lista se actualizará al terminar.",
         });
-        router.refresh();
       } catch {
         setBanner({ type: "err", text: "Fallo de red al sincronizar." });
       }
@@ -908,61 +929,48 @@ export function CompaniesTable({
         return;
       }
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let incomplete = "";
       let total = 0;
       let itemsReceived = 0;
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) {
-          break;
+      await consumeMonitorSse(res.body, (ev) => {
+        if (ev.type === "start") {
+          total = ev.total;
+          setBulkTotal(total);
+          setBulkProgress(`Procesando 0 de ${total}…`);
         }
-        incomplete += decoder.decode(value, { stream: true });
-        const { events, rest } = shiftCompleteBulkSseEvents(incomplete);
-        incomplete = rest;
-
-        for (const ev of events) {
-          if (ev.type === "start") {
-            total = ev.total;
-            setBulkTotal(total);
-            setBulkProgress(`Procesando 0 de ${total}…`);
+        if (ev.type === "item_start") {
+          setActiveBulkLinkId(ev.linkId);
+          setBulkProgress(
+            total > 0
+              ? `Verificando «${ev.companyName}» (${ev.index}/${total})…`
+              : `Verificando «${ev.companyName}»…`,
+          );
+        }
+        if (ev.type === "item") {
+          itemsReceived += 1;
+          setBulkCompleted(itemsReceived);
+          setActiveBulkLinkId(null);
+          if (total > 0) {
+            setBulkProgress(`Completados ${itemsReceived} de ${total}…`);
           }
-          if (ev.type === "item_start") {
-            setActiveBulkLinkId(ev.linkId);
-            setBulkProgress(
-              total > 0
-                ? `Verificando «${ev.companyName}» (${ev.index}/${total})…`
-                : `Verificando «${ev.companyName}»…`,
-            );
-          }
-          if (ev.type === "item") {
-            itemsReceived += 1;
-            setBulkCompleted(itemsReceived);
-            setActiveBulkLinkId(null);
-            if (total > 0) {
-              setBulkProgress(`Completados ${itemsReceived} de ${total}…`);
-            }
-            startTransition(() => {
-              router.refresh();
-            });
-          }
-          if (ev.type === "done") {
-            finalOk = ev.ok;
-            finalFail = ev.fail;
-            sawDone = true;
-            setActiveBulkLinkId(null);
-            if (ev.cancelled) {
-              cancelledByUser = true;
-            }
-          }
-          if (ev.type === "fatal") {
-            fatalMessage = ev.error;
-            setActiveBulkLinkId(null);
+          startTransition(() => {
+            router.refresh();
+          });
+        }
+        if (ev.type === "done") {
+          finalOk = ev.ok;
+          finalFail = ev.fail;
+          sawDone = true;
+          setActiveBulkLinkId(null);
+          if (ev.cancelled) {
+            cancelledByUser = true;
           }
         }
-      }
+        if (ev.type === "fatal") {
+          fatalMessage = ev.error;
+          setActiveBulkLinkId(null);
+        }
+      });
 
       if (!sawDone && !fatalMessage && !cancelledByUser) {
         fatalMessage = "La conexión terminó antes de recibir el resumen final.";
@@ -1024,38 +1032,101 @@ export function CompaniesTable({
   async function runCheck(linkId: string, companyName: string) {
     setBanner(null);
     setPendingCheck(linkId);
+    setActiveBulkLinkId(linkId);
     try {
-      const res = await fetch(`/api/monitor/${linkId}`, { method: "POST" });
-      const data = (await res.json()) as {
-        error?: string;
-        code?: string;
-        errorDetail?: string;
-      };
+      const res = await fetch(`/api/monitor/${linkId}`, {
+        method: "POST",
+        headers: { Accept: "text/event-stream" },
+      });
+
       if (!res.ok) {
-        if (
-          res.status === 428 ||
-          data.code === "VERIFICATION_PROFILE_INCOMPLETE"
-        ) {
+        const raw = await res.text();
+        let detail: string | null = null;
+        let code: string | undefined;
+        try {
+          const data = JSON.parse(raw) as { error?: string; code?: string };
+          code = data.code;
+          detail =
+            typeof data.error === "string" && data.error.trim() !== ""
+              ? data.error.trim()
+              : null;
+        } catch {
+          detail = raw.replace(/\s+/g, " ").trim().slice(0, 220) || null;
+        }
+        if (res.status === 428 || code === "VERIFICATION_PROFILE_INCOMPLETE") {
           router.push("/dashboard/setup");
           return;
         }
         setBanner({
           type: "err",
           text:
-            data.error != null && data.error !== ""
-              ? `«${companyName}»: ${data.error}`
+            detail != null
+              ? `«${companyName}»: ${detail}`
               : `Error en la verificación de «${companyName}».`,
         });
-        // El detalle técnico se persiste en Neon y se puede ver en el modal (icono de la columna Error).
         startTransition(() => {
           void router.refresh();
         });
         return;
       }
-      setBanner({
-        type: "ok",
-        text: `Verificación finalizada para «${companyName}». Revise el resultado en la tabla.`,
+
+      if (!res.body) {
+        setBanner({
+          type: "err",
+          text: `El navegador no permitió leer el progreso de la verificación de «${companyName}».`,
+        });
+        return;
+      }
+
+      let ok = 0;
+      let fail = 0;
+      let itemError: string | null = null;
+      let fatalMessage: string | null = null;
+
+      // La verificación corre en el worker (asíncrona): mostramos el spinner en
+      // la fila mientras el job progresa y refrescamos al recibir el resultado.
+      await consumeMonitorSse(res.body, (ev) => {
+        if (ev.type === "item") {
+          if (ev.ok) {
+            ok += 1;
+          } else {
+            fail += 1;
+            itemError = ev.error ?? null;
+          }
+          startTransition(() => {
+            router.refresh();
+          });
+        }
+        if (ev.type === "done") {
+          ok = ev.ok;
+          fail = ev.fail;
+        }
+        if (ev.type === "fatal") {
+          fatalMessage = ev.error;
+        }
       });
+
+      if (fatalMessage) {
+        setBanner({ type: "err", text: `«${companyName}»: ${fatalMessage}` });
+      } else if (fail > 0) {
+        setBanner({
+          type: "err",
+          text:
+            itemError != null
+              ? `«${companyName}»: ${itemError}`
+              : `Error en la verificación de «${companyName}». Revise la columna «Error».`,
+        });
+      } else if (ok > 0) {
+        setBanner({
+          type: "ok",
+          text: `Verificación finalizada para «${companyName}». Revise el resultado en la tabla.`,
+        });
+      } else {
+        setBanner({
+          type: "err",
+          text: `La verificación de «${companyName}» terminó sin resultado. Intente de nuevo.`,
+        });
+      }
       router.refresh();
     } catch {
       setBanner({
@@ -1064,6 +1135,7 @@ export function CompaniesTable({
       });
     } finally {
       setPendingCheck(null);
+      setActiveBulkLinkId(null);
     }
   }
 
