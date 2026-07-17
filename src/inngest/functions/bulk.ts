@@ -93,7 +93,15 @@ export const monitorLinkVerify = inngest.createFunction(
     );
 
     const manualWaitMs = monitorEnvMs("MONITOR_MANUAL_WAIT_MS", 120_000);
-    const rawItemTimeout = monitorEnvMs("MONITOR_BULK_ITEM_TIMEOUT_MS", 20_000);
+    // Cap por ítem. En el worker Hetzner (proceso persistente) los patrones
+    // navegan hasta 120 s, así que el default debe superar la navegación + las
+    // esperas; 180 s cubre el caso común. El viejo default de 20 s venía del
+    // presupuesto corto de Vercel serverless y cancelaba casi toda verificación.
+    // Ajustable/deshabilitable con MONITOR_BULK_ITEM_TIMEOUT_MS (0 = sin cap).
+    const rawItemTimeout = monitorEnvMs(
+      "MONITOR_BULK_ITEM_TIMEOUT_MS",
+      180_000,
+    );
     const itemTimeoutMs = rawItemTimeout > 0 ? rawItemTimeout : null;
 
     const result = await step.run("verify-link", () =>
