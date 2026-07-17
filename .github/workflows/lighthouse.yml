@@ -21,7 +21,7 @@ jobs:
       NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: /dashboard
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
