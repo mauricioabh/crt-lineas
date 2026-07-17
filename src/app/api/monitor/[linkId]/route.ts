@@ -1,21 +1,20 @@
 import { NextResponse } from "next/server";
-import { parseSearchParams } from "@/lib/api/validate";
-import { MonitorSingleQuerySchema } from "@/lib/openapi/schemas";
-import { launchChromium } from "@/lib/playwright-launch";
 import { requireUserId } from "@/lib/auth";
 import { requireMonitorCredentials } from "@/lib/verification-profile";
 import { prisma } from "@/lib/db";
 import { authErrorResponse } from "@/lib/http";
-import {
-  formatUnknownMonitorError,
-  MonitorRunError,
-} from "@/lib/monitor-error-format";
-import { executeAutomatedMonitorOnPage } from "@/lib/monitor-verify-link";
+import { inngest } from "@/inngest/client";
+import { createMonitorBulkJob } from "@/lib/monitor-bulk-job";
+import { createMonitorJobSseResponse } from "@/lib/monitor-job-sse-response";
 import { getPattern } from "@/monitoring";
 
 export const runtime = "nodejs";
-export const maxDuration = 300;
 
+/**
+ * Verificación single asíncrona: encola un `MonitorBulkJob` de un solo item y
+ * transmite el progreso/resultado por SSE (mismo camino de ejecución que bulk;
+ * el navegador corre en el worker Hetzner, no en Vercel).
+ */
 export async function POST(
   request: Request,
   context: { params: Promise<{ linkId: string }> },
@@ -31,9 +30,9 @@ export async function POST(
     throw e;
   }
 
-  let credentials;
   try {
-    credentials = await requireMonitorCredentials(userId);
+    // Valida que el perfil de verificación esté completo (lanza 428 si no).
+    await requireMonitorCredentials(userId);
   } catch (e) {
     const res = authErrorResponse(e);
     if (res) {
@@ -43,13 +42,6 @@ export async function POST(
   }
 
   const { linkId } = await context.params;
-  const queryParsed = parseSearchParams(
-    MonitorSingleQuerySchema,
-    new URL(request.url).searchParams,
-  );
-  if ("error" in queryParsed) {
-    return NextResponse.json({ error: queryParsed.error }, { status: 400 });
-  }
 
   const link = await prisma.companyLink.findUnique({
     where: { id: linkId },
@@ -62,16 +54,6 @@ export async function POST(
   if (!link.company.enabled) {
     return NextResponse.json({ error: "Company disabled" }, { status: 400 });
   }
-
-  const bulkRun = queryParsed.data.bulk === "1";
-  /** Verificación masiva (`?bulk=1`): siempre headless. En Vercel no hay modo headed. */
-  const headed =
-    process.env.PLAYWRIGHT_HEADED === "true" &&
-    !bulkRun &&
-    process.env.VERCEL !== "1";
-  const manualWaitMs = Number(process.env.MONITOR_MANUAL_WAIT_MS ?? 120_000);
-  const curp = credentials.curp;
-  const phone = credentials.phone;
 
   const pattern = getPattern(link.company.name, link.url);
   if (!pattern.supportsAutomatedVerification) {
@@ -86,71 +68,16 @@ export async function POST(
     );
   }
 
-  let browser;
-  try {
-    browser = await launchChromium({ headless: !headed });
-  } catch (launchErr) {
-    const { userMessage, technical } = formatUnknownMonitorError(launchErr);
-    console.error(
-      "[monitor] chromium.launch failed",
-      { linkId, company: link.company.name },
-      launchErr,
-    );
-    return NextResponse.json(
-      { error: userMessage, errorDetail: technical },
-      { status: 500 },
-    );
-  }
+  const job = await createMonitorBulkJob({
+    userId,
+    linkIds: [link.id],
+    linksById: new Map([[link.id, link]]),
+  });
 
-  try {
-    const page = await browser.newPage();
-    const { patternId, result, userResult } =
-      await executeAutomatedMonitorOnPage(page, link, {
-        userId,
-        curp,
-        phone,
-        manualWaitMs: Number.isFinite(manualWaitMs) ? manualWaitMs : 120_000,
-        batchId: null,
-      });
+  await inngest.send({
+    name: "monitor/bulk.started",
+    data: { jobId: job.id, userId },
+  });
 
-    return NextResponse.json({
-      ok: true,
-      patternId,
-      result,
-      link: userResult,
-    });
-  } catch (err) {
-    if (err instanceof MonitorRunError) {
-      return NextResponse.json(
-        { error: err.message, errorDetail: err.technicalDetail },
-        { status: 500 },
-      );
-    }
-    const code =
-      typeof err === "object" && err !== null && "code" in err
-        ? String((err as { code?: unknown }).code)
-        : "";
-    if (code === "NO_AUTOMATED_VERIFICATION_PROTOCOL") {
-      return NextResponse.json(
-        {
-          error:
-            "Este enlace no tiene un protocolo de verificación automatizado configurado. Use el desplegable «Líneas activas» y las acciones manuales, o espere a que se agregue soporte para este portal.",
-          code: "NO_AUTOMATED_VERIFICATION_PROTOCOL",
-        },
-        { status: 422 },
-      );
-    }
-    const { userMessage, technical } = formatUnknownMonitorError(err);
-    console.error(
-      "[monitor] unexpected error",
-      { linkId, company: link.company.name },
-      err,
-    );
-    return NextResponse.json(
-      { error: userMessage, errorDetail: technical },
-      { status: 500 },
-    );
-  } finally {
-    await browser.close();
-  }
+  return createMonitorJobSseResponse(job.id, userId, request.signal);
 }

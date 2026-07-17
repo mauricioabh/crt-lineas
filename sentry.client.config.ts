@@ -10,6 +10,11 @@ Sentry.init({
   enabled: Boolean(getSentryDsn()),
   environment: process.env.NODE_ENV,
   tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1,
+  integrations: [
+    Sentry.browserTracingIntegration({
+      enableInp: true,
+    }),
+  ],
   beforeSend: scrubSentryEvent,
   beforeBreadcrumb: scrubBreadcrumb,
 });

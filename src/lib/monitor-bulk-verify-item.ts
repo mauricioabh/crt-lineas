@@ -1,6 +1,9 @@
 import type { Browser, BrowserContext } from "playwright";
 import { prisma } from "@/lib/db";
-import { launchChromium } from "@/lib/playwright-launch";
+import {
+  launchChromium,
+  newContextWithEvalShim,
+} from "@/lib/playwright-launch";
 import {
   formatUnknownMonitorError,
   MonitorRunError,
@@ -70,7 +73,7 @@ export async function verifyMonitorLinkForBulk(params: {
 
   try {
     browser = await launchChromium({ headless: true });
-    context = await browser.newContext();
+    context = await newContextWithEvalShim(browser);
     const page = await context.newPage();
     try {
       const { patternId } = await executeAutomatedMonitorOnPage(page, link, {

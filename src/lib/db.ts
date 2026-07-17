@@ -25,10 +25,16 @@ function getPrismaDatabaseUrl(): string | undefined {
   return raw;
 }
 
+const databaseUrl = getPrismaDatabaseUrl();
+
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    datasources: { db: { url: getPrismaDatabaseUrl() } },
+    // Solo sobreescribir el datasource cuando hay URL. Si falta (p. ej. durante
+    // el build sin DATABASE_URL en scope), dejamos que Prisma resuelva
+    // `env("DATABASE_URL")` de forma perezosa y evitamos que el constructor
+    // lance `Invalid value undefined for datasource "db"` en build time.
+    ...(databaseUrl ? { datasources: { db: { url: databaseUrl } } } : {}),
     log:
       process.env.NODE_ENV === "development"
         ? ["query", "error", "warn"]
