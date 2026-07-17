@@ -8,12 +8,12 @@ services:
     build:
       context: .
       dockerfile: worker/Dockerfile
-    image: ${WORKER_IMAGE:-ghcr.io/OWNER/crt-lineas-worker:latest}
+    image: ${WORKER_IMAGE:-ghcr.io/mauricioabh/crt-lineas-worker:latest}
     restart: unless-stopped
     env_file:
       - .env.worker
     ports:
-      - "3100:3100"
+      - "127.0.0.1:3100:3100"
     healthcheck:
       test:
         [
