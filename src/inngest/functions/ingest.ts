@@ -1,7 +1,7 @@
 import { inngest } from "@/inngest/client";
 import { scrapeCrtCompanies } from "@/lib/crt-ingest";
 import { prisma } from "@/lib/db";
-import { launchChromium } from "@/lib/playwright-launch";
+import { launchChromium, newPageWithEvalShim } from "@/lib/playwright-launch";
 import { linkSupportsAutomatedVerification } from "@/monitoring";
 
 /**
@@ -17,7 +17,7 @@ export const ingestScrape = inngest.createFunction(
     const scraped = await step.run("scrape-crt", async () => {
       const browser = await launchChromium({ headless: true });
       try {
-        const page = await browser.newPage();
+        const page = await newPageWithEvalShim(browser);
         return await scrapeCrtCompanies(page);
       } finally {
         await browser.close();
