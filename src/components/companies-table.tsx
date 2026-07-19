@@ -3,10 +3,14 @@
 import type { DashboardCompany } from "@/app/(dashboard)/dashboard/page";
 import { sanitizeEnvFromUserFacingText } from "@/lib/monitor-error-format";
 import {
+  AutoStatusChip,
   ManualBadge,
   LinesStatusBadge,
   ReviewedBadge,
 } from "@/components/status-badge";
+import { CompaniesMobileList } from "@/components/companies-mobile-list";
+import { CompanyLinkDetailSheet } from "@/components/company-link-detail-sheet";
+import type { CompanyLinkRow } from "@/components/company-link-row";
 import { ReviewScreenshotLightbox } from "@/components/review-screenshot-lightbox";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -48,23 +52,8 @@ import { cn } from "@/lib/utils";
 
 type VerificationStatus = "yes" | "in-review" | "pending" | "no";
 
-type FlatRow = {
-  num: number;
-  companyId: string;
-  companyName: string;
-  enabled: boolean;
-  linkId: string;
-  url: string;
-  verificationStatus: VerificationStatus;
-  hasActiveLines: boolean | null;
-  isReviewed: boolean;
-  isManualReview: boolean;
-  lastReviewedAt: string | null;
-  reviewScreenshotAt: string | null;
-  lastMonitorErrorAt: string | null;
-  lastMonitorErrorMessage: string | null;
-  lastMonitorErrorDetail: string | null;
-};
+/** Fila aplanada compartida con la vista móvil (lista + sheet de detalle). */
+type FlatRow = CompanyLinkRow;
 
 type SortKey =
   | "default"
@@ -492,6 +481,7 @@ export function CompaniesTable({
   const [pendingIngest, startIngest] = useTransition();
   const [pendingCheck, setPendingCheck] = useState<string | null>(null);
   const [pendingToggle, setPendingToggle] = useState<string | null>(null);
+  const [detailLinkId, setDetailLinkId] = useState<string | null>(null);
   const [previewLinkId, setPreviewLinkId] = useState<string | null>(null);
   const [previewScreenshotCacheKey, setPreviewScreenshotCacheKey] = useState<
     string | null
@@ -595,6 +585,14 @@ export function CompaniesTable({
     sortKey,
     sortDir,
   ]);
+
+  const detailRow = useMemo(
+    () =>
+      detailLinkId === null
+        ? null
+        : (rows.find((r) => r.linkId === detailLinkId) ?? null),
+    [rows, detailLinkId],
+  );
 
   const selectableDisplayRows = useMemo(
     () =>
@@ -1330,7 +1328,7 @@ export function CompaniesTable({
                 type="button"
                 variant="bulk"
                 size="sm"
-                className="h-9 shrink-0 gap-1.5 font-semibold"
+                className="hidden h-9 shrink-0 gap-1.5 font-semibold md:inline-flex"
                 disabled={
                   bulkChecking ||
                   pendingCheck !== null ||
@@ -1794,467 +1792,489 @@ export function CompaniesTable({
               criterios o pulse «Restablecer todo» en el panel de filtros.
             </p>
           ) : (
-            <div
-              className={cn(
-                "max-h-[min(75vh,56rem)] w-full overflow-auto rounded-lg border border-zinc-200 bg-white",
-                "dark:border-zinc-800 dark:bg-zinc-900",
-              )}
-            >
-              <Table className="w-full table-fixed border-collapse text-xs">
-                <colgroup>
-                  {colWidths.map((w, i) => (
-                    <col key={i} style={{ width: w }} />
-                  ))}
-                </colgroup>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead
-                      className={cn(stickyHeadCell, "text-center align-middle")}
-                    >
-                      <input
-                        ref={selectAllCheckboxRef}
-                        type="checkbox"
-                        className="size-4 cursor-pointer rounded border border-input bg-background accent-primary disabled:cursor-not-allowed disabled:opacity-50"
-                        checked={
-                          allSelectableVisibleSelected &&
-                          selectableDisplayRows.length > 0
-                        }
-                        disabled={
-                          bulkChecking ||
-                          pendingCheck !== null ||
-                          selectableDisplayRows.length === 0
-                        }
-                        onChange={() => {
-                          toggleSelectAllVisible();
-                        }}
-                        aria-label="Seleccionar o quitar todos los enlaces verificables visibles en la tabla"
-                        title="Solo enlaces con verificación automática y compañía habilitada"
-                      />
-                    </TableHead>
-                    {showCol("num") ? (
-                      <TableHead className={cn(stickyHeadCell)}>#</TableHead>
-                    ) : null}
-                    {showCol("company") ? (
-                      <SortableTableHead
-                        columnKey="company"
-                        sortKey={sortKey}
-                        sortDir={sortDir}
-                        onSort={onSortClick}
-                        className={stickyHeadCell}
+            <>
+              {/* Vista móvil (< md): lista compacta; el detalle y «Verificar» viven en el sheet. */}
+              <div className="md:hidden">
+                <CompaniesMobileList
+                  rows={displayRows}
+                  pendingCheckLinkId={pendingCheck ?? activeBulkLinkId}
+                  onOpenDetail={(linkId) => {
+                    setDetailLinkId(linkId);
+                  }}
+                />
+              </div>
+              <div
+                className={cn(
+                  "hidden max-h-[min(75vh,56rem)] w-full overflow-auto rounded-lg border border-zinc-200 bg-white md:block",
+                  "dark:border-zinc-800 dark:bg-zinc-900",
+                )}
+              >
+                <Table className="w-full table-fixed border-collapse text-xs">
+                  <colgroup>
+                    {colWidths.map((w, i) => (
+                      <col key={i} style={{ width: w }} />
+                    ))}
+                  </colgroup>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead
+                        className={cn(
+                          stickyHeadCell,
+                          "text-center align-middle",
+                        )}
                       >
-                        Compañía
-                      </SortableTableHead>
-                    ) : null}
-                    {isAdmin && showCol("enabled") ? (
-                      <TableHead className={cn(stickyHeadCell)}>
-                        Visible
+                        <input
+                          ref={selectAllCheckboxRef}
+                          type="checkbox"
+                          className="size-4 cursor-pointer rounded border border-input bg-background accent-primary disabled:cursor-not-allowed disabled:opacity-50"
+                          checked={
+                            allSelectableVisibleSelected &&
+                            selectableDisplayRows.length > 0
+                          }
+                          disabled={
+                            bulkChecking ||
+                            pendingCheck !== null ||
+                            selectableDisplayRows.length === 0
+                          }
+                          onChange={() => {
+                            toggleSelectAllVisible();
+                          }}
+                          aria-label="Seleccionar o quitar todos los enlaces verificables visibles en la tabla"
+                          title="Solo enlaces con verificación automática y compañía habilitada"
+                        />
                       </TableHead>
-                    ) : null}
-                    {showCol("auto") ? (
-                      <SortableTableHead
-                        columnKey="auto"
-                        sortKey={sortKey}
-                        sortDir={sortDir}
-                        onSort={onSortClick}
-                        className={stickyHeadCell}
-                        title="Este enlace admite verificación automatizada"
-                        align="center"
-                      >
-                        Auto
-                      </SortableTableHead>
-                    ) : null}
-                    {showCol("site") ? (
-                      <TableHead className={cn(stickyHeadCell)}>
-                        Sitio
-                      </TableHead>
-                    ) : null}
-                    {showCol("url") ? (
-                      <TableHead className={cn(stickyHeadCell)}>URL</TableHead>
-                    ) : null}
-                    {showCol("lines") ? (
-                      <SortableTableHead
-                        columnKey="lines"
-                        sortKey={sortKey}
-                        sortDir={sortDir}
-                        onSort={onSortClick}
-                        className={stickyHeadCell}
-                        align="center"
-                      >
-                        Líneas
-                      </SortableTableHead>
-                    ) : null}
-                    {showCol("reviewed") ? (
-                      <SortableTableHead
-                        columnKey="reviewed"
-                        sortKey={sortKey}
-                        sortDir={sortDir}
-                        onSort={onSortClick}
-                        className={stickyHeadCell}
-                        align="center"
-                      >
-                        Revisado
-                      </SortableTableHead>
-                    ) : null}
-                    {showCol("manual") ? (
-                      <SortableTableHead
-                        columnKey="manual"
-                        sortKey={sortKey}
-                        sortDir={sortDir}
-                        onSort={onSortClick}
-                        className={stickyHeadCell}
-                        align="center"
-                      >
-                        Manual
-                      </SortableTableHead>
-                    ) : null}
-                    {showCol("reviewedAt") ? (
-                      <SortableTableHead
-                        columnKey="reviewedAt"
-                        sortKey={sortKey}
-                        sortDir={sortDir}
-                        onSort={onSortClick}
-                        className={stickyHeadCell}
-                      >
-                        Última revisión
-                      </SortableTableHead>
-                    ) : null}
-                    {showCol("screenshot") ? (
-                      <TableHead className={cn(stickyHeadCell)}>
-                        Captura
-                      </TableHead>
-                    ) : null}
-                    {showCol("actions") ? (
-                      <TableHead className={cn(stickyHeadCell)}>
-                        Acciones
-                      </TableHead>
-                    ) : null}
-                    {showCol("verifyErr") ? (
-                      <SortableTableHead
-                        columnKey="verifyErr"
-                        sortKey={sortKey}
-                        sortDir={sortDir}
-                        onSort={onSortClick}
-                        className={stickyHeadCell}
-                        align="center"
-                        title="Último fallo de verificación automática (individual o masiva)"
-                      >
-                        Error
-                      </SortableTableHead>
-                    ) : null}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {displayRows.map((r, rowIdx) => {
-                    const canSelect =
-                      r.enabled && r.verificationStatus === "yes";
-                    const isSelected = selectedLinkIds.has(r.linkId);
-                    return (
-                      <TableRow key={r.linkId}>
-                        <TableCell className="text-center align-middle">
-                          <input
-                            type="checkbox"
-                            className="size-4 cursor-pointer rounded border border-input bg-background accent-primary disabled:cursor-not-allowed disabled:opacity-50"
-                            checked={isSelected}
-                            disabled={
-                              bulkChecking ||
-                              pendingCheck !== null ||
-                              !canSelect
-                            }
-                            onChange={() => {
-                              toggleRowSelected(r.linkId, canSelect);
-                            }}
-                            aria-label={`Seleccionar ${r.companyName} (${r.url}) para verificación masiva`}
-                            title={
-                              !r.enabled
-                                ? "Compañía deshabilitada"
-                                : r.verificationStatus !== "yes"
-                                  ? "Sin verificación automática en este enlace"
-                                  : undefined
-                            }
-                          />
-                        </TableCell>
-                        {showCol("num") ? (
-                          <TableCell className="font-mono text-muted-foreground">
-                            {rowIdx + 1}
-                          </TableCell>
-                        ) : null}
-                        {showCol("company") ? (
-                          <TableCell
-                            className="truncate font-medium"
-                            title={r.companyName}
-                          >
-                            {r.companyName}
-                          </TableCell>
-                        ) : null}
-                        {isAdmin && showCol("enabled") ? (
-                          <TableCell>
-                            <div className="flex justify-center">
-                              <Switch
-                                checked={
-                                  enabledByCompany.get(r.companyId) ?? r.enabled
-                                }
-                                disabled={
-                                  bulkChecking || pendingToggle === r.companyId
-                                }
-                                onCheckedChange={(checked) => {
-                                  void toggleCompany(r.companyId, checked);
-                                }}
-                                aria-label={`Mostrar ${r.companyName} en monitoreo`}
-                              />
-                            </div>
-                          </TableCell>
-                        ) : null}
-                        {showCol("auto") ? (
-                          <TableCell className="whitespace-nowrap text-center align-middle">
-                            {r.verificationStatus === "yes" ? (
-                              <span
-                                className="inline-flex h-5 items-center rounded-full bg-emerald-100 px-1.5 text-[11px] font-medium leading-none text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
-                                title="Hay verificación automatizada; «Verificar» consulta el portal"
-                              >
-                                Sí
-                              </span>
-                            ) : r.verificationStatus === "in-review" ? (
-                              <span
-                                className="inline-flex h-5 items-center rounded-full bg-blue-100 px-1.5 text-[11px] font-medium leading-none text-blue-800 dark:bg-blue-950 dark:text-blue-300"
-                                title="Protocolo escrito, en revisión y pruebas"
-                              >
-                                En revisión
-                              </span>
-                            ) : r.verificationStatus === "pending" ? (
-                              <span
-                                className="inline-flex h-5 items-center rounded-full bg-amber-100 px-1.5 text-[11px] font-medium leading-none text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                                title="El portal aún no cuenta con un flujo de verificación automatizable"
-                              >
-                                Pendiente
-                              </span>
-                            ) : (
-                              <span
-                                className="inline-flex h-5 items-center rounded-full bg-zinc-100 px-1.5 text-[11px] font-medium leading-none text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-                                title="Sin protocolo automatizado; use el ajuste manual de líneas"
-                              >
-                                No
-                              </span>
-                            )}
-                          </TableCell>
-                        ) : null}
-                        {showCol("site") ? (
-                          <TableCell className="text-center">
-                            <a
-                              href={r.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              title={r.url}
-                              aria-label={`Abrir en nueva pestaña: ${r.url}`}
-                              className={buttonVariants({
-                                variant: "outline",
-                                size: "icon",
-                                className: "size-8",
-                              })}
-                            >
-                              <ExternalLink className="size-3.5" aria-hidden />
-                            </a>
-                          </TableCell>
-                        ) : null}
-                        {showCol("url") ? (
-                          <TableCell className="min-w-0 overflow-hidden">
-                            <a
-                              href={r.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              title={r.url}
-                              className="block truncate font-mono text-xs text-primary underline-offset-2 hover:underline"
-                            >
-                              {r.url}
-                            </a>
-                          </TableCell>
-                        ) : null}
-                        {showCol("lines") ? (
-                          <TableCell className="whitespace-normal align-top">
-                            <div className="flex min-w-0 flex-col gap-1">
-                              <LinesStatusBadge
-                                hasActiveLines={r.hasActiveLines}
-                                className="max-w-full justify-center"
-                              />
-                              <select
-                                disabled={bulkChecking}
-                                className="h-8 w-full min-w-0 rounded-md border border-border bg-background px-1.5 text-xs dark:bg-zinc-950"
-                                value={
-                                  r.hasActiveLines === null
-                                    ? "unknown"
-                                    : r.hasActiveLines
-                                      ? "yes"
-                                      : "no"
-                                }
-                                onChange={(e) => {
-                                  const v = e.target.value;
-                                  const next =
-                                    v === "unknown"
-                                      ? null
-                                      : v === "yes"
-                                        ? true
-                                        : false;
-                                  void patchLineStatus(r.linkId, next, true);
-                                }}
-                              >
-                                <option value="unknown">
-                                  Ajustar: desconocido
-                                </option>
-                                <option value="yes">Ajustar: con líneas</option>
-                                <option value="no">Ajustar: sin líneas</option>
-                              </select>
-                            </div>
-                          </TableCell>
-                        ) : null}
-                        {showCol("reviewed") ? (
-                          <TableCell className="whitespace-nowrap text-center">
-                            <ReviewedBadge
-                              reviewed={r.isReviewed}
-                              className="justify-center"
-                            />
-                          </TableCell>
-                        ) : null}
-                        {showCol("manual") ? (
-                          <TableCell className="text-center">
-                            <ManualBadge
-                              manual={r.isManualReview}
-                              className="justify-center"
-                            />
-                          </TableCell>
-                        ) : null}
-                        {showCol("reviewedAt") ? (
-                          <TableCell
-                            className="whitespace-normal font-medium text-foreground tabular-nums"
-                            title={
-                              r.lastReviewedAt
-                                ? new Date(r.lastReviewedAt).toLocaleString(
-                                    "es-MX",
-                                  )
-                                : undefined
-                            }
-                          >
-                            <span suppressHydrationWarning>
-                              {r.lastReviewedAt
-                                ? formatReviewedAt(r.lastReviewedAt)
-                                : "—"}
-                            </span>
-                          </TableCell>
-                        ) : null}
-                        {showCol("screenshot") ? (
-                          <TableCell className="p-1 align-middle">
-                            {r.reviewScreenshotAt ? (
-                              <button
-                                type="button"
-                                title="Ver captura de verificación en grande"
-                                aria-label="Ver captura de verificación en grande"
-                                className="group relative block w-full cursor-pointer overflow-hidden rounded-sm border border-border bg-muted/40 transition hover:border-primary hover:ring-1 hover:ring-primary/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                                onClick={() => {
-                                  setPreviewLinkId(r.linkId);
-                                  setPreviewScreenshotCacheKey(
-                                    r.reviewScreenshotAt ?? "",
-                                  );
-                                }}
-                              >
-                                {/* eslint-disable-next-line @next/next/no-img-element -- same-origin API + cookies */}
-                                <img
-                                  src={`/api/company-links/${r.linkId}/screenshot?v=${encodeURIComponent(r.reviewScreenshotAt ?? "")}`}
-                                  alt="Captura de verificación"
-                                  width={80}
-                                  height={48}
-                                  className="block h-9 w-full object-cover object-top transition group-hover:opacity-60"
-                                  loading="lazy"
-                                />
-                                <span className="absolute inset-0 flex items-center justify-center opacity-0 transition group-hover:opacity-100">
-                                  <span className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                                    Ver
-                                  </span>
-                                </span>
-                              </button>
-                            ) : (
-                              <span className="text-muted-foreground">—</span>
-                            )}
-                          </TableCell>
-                        ) : null}
-                        {showCol("actions") ? (
-                          <TableCell>
-                            <Button
-                              className="h-8 shrink-0 px-2.5 text-xs"
-                              size="sm"
+                      {showCol("num") ? (
+                        <TableHead className={cn(stickyHeadCell)}>#</TableHead>
+                      ) : null}
+                      {showCol("company") ? (
+                        <SortableTableHead
+                          columnKey="company"
+                          sortKey={sortKey}
+                          sortDir={sortDir}
+                          onSort={onSortClick}
+                          className={stickyHeadCell}
+                        >
+                          Compañía
+                        </SortableTableHead>
+                      ) : null}
+                      {isAdmin && showCol("enabled") ? (
+                        <TableHead className={cn(stickyHeadCell)}>
+                          Visible
+                        </TableHead>
+                      ) : null}
+                      {showCol("auto") ? (
+                        <SortableTableHead
+                          columnKey="auto"
+                          sortKey={sortKey}
+                          sortDir={sortDir}
+                          onSort={onSortClick}
+                          className={stickyHeadCell}
+                          title="Este enlace admite verificación automatizada"
+                          align="center"
+                        >
+                          Auto
+                        </SortableTableHead>
+                      ) : null}
+                      {showCol("site") ? (
+                        <TableHead className={cn(stickyHeadCell)}>
+                          Sitio
+                        </TableHead>
+                      ) : null}
+                      {showCol("url") ? (
+                        <TableHead className={cn(stickyHeadCell)}>
+                          URL
+                        </TableHead>
+                      ) : null}
+                      {showCol("lines") ? (
+                        <SortableTableHead
+                          columnKey="lines"
+                          sortKey={sortKey}
+                          sortDir={sortDir}
+                          onSort={onSortClick}
+                          className={stickyHeadCell}
+                          align="center"
+                        >
+                          Líneas
+                        </SortableTableHead>
+                      ) : null}
+                      {showCol("reviewed") ? (
+                        <SortableTableHead
+                          columnKey="reviewed"
+                          sortKey={sortKey}
+                          sortDir={sortDir}
+                          onSort={onSortClick}
+                          className={stickyHeadCell}
+                          align="center"
+                        >
+                          Revisado
+                        </SortableTableHead>
+                      ) : null}
+                      {showCol("manual") ? (
+                        <SortableTableHead
+                          columnKey="manual"
+                          sortKey={sortKey}
+                          sortDir={sortDir}
+                          onSort={onSortClick}
+                          className={stickyHeadCell}
+                          align="center"
+                        >
+                          Manual
+                        </SortableTableHead>
+                      ) : null}
+                      {showCol("reviewedAt") ? (
+                        <SortableTableHead
+                          columnKey="reviewedAt"
+                          sortKey={sortKey}
+                          sortDir={sortDir}
+                          onSort={onSortClick}
+                          className={stickyHeadCell}
+                        >
+                          Última revisión
+                        </SortableTableHead>
+                      ) : null}
+                      {showCol("screenshot") ? (
+                        <TableHead className={cn(stickyHeadCell)}>
+                          Captura
+                        </TableHead>
+                      ) : null}
+                      {showCol("actions") ? (
+                        <TableHead className={cn(stickyHeadCell)}>
+                          Acciones
+                        </TableHead>
+                      ) : null}
+                      {showCol("verifyErr") ? (
+                        <SortableTableHead
+                          columnKey="verifyErr"
+                          sortKey={sortKey}
+                          sortDir={sortDir}
+                          onSort={onSortClick}
+                          className={stickyHeadCell}
+                          align="center"
+                          title="Último fallo de verificación automática (individual o masiva)"
+                        >
+                          Error
+                        </SortableTableHead>
+                      ) : null}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {displayRows.map((r, rowIdx) => {
+                      const canSelect =
+                        r.enabled && r.verificationStatus === "yes";
+                      const isSelected = selectedLinkIds.has(r.linkId);
+                      return (
+                        <TableRow key={r.linkId}>
+                          <TableCell className="text-center align-middle">
+                            <input
+                              type="checkbox"
+                              className="size-4 cursor-pointer rounded border border-input bg-background accent-primary disabled:cursor-not-allowed disabled:opacity-50"
+                              checked={isSelected}
                               disabled={
                                 bulkChecking ||
-                                pendingCheck === r.linkId ||
-                                !r.enabled ||
-                                r.verificationStatus !== "yes"
+                                pendingCheck !== null ||
+                                !canSelect
                               }
+                              onChange={() => {
+                                toggleRowSelected(r.linkId, canSelect);
+                              }}
+                              aria-label={`Seleccionar ${r.companyName} (${r.url}) para verificación masiva`}
                               title={
                                 !r.enabled
-                                  ? "Compañía deshabilitada para usuarios."
-                                  : r.verificationStatus === "in-review"
-                                    ? "Protocolo en revisión; aún no habilitado para ejecución automática. Ajuste el estado con el desplegable de líneas activas."
-                                    : r.verificationStatus === "pending"
-                                      ? "El portal aún no cuenta con un flujo de verificación automatizable. Ajuste el estado con el desplegable de líneas activas."
-                                      : r.verificationStatus === "no"
-                                        ? "Este portal no tiene protocolo de verificación automatizado. Ajuste el estado con el desplegable de líneas activas."
-                                        : undefined
+                                  ? "Compañía deshabilitada"
+                                  : r.verificationStatus !== "yes"
+                                    ? "Sin verificación automática en este enlace"
+                                    : undefined
                               }
-                              onClick={() => {
-                                void runCheck(r.linkId, r.companyName);
-                              }}
+                            />
+                          </TableCell>
+                          {showCol("num") ? (
+                            <TableCell className="font-mono text-muted-foreground">
+                              {rowIdx + 1}
+                            </TableCell>
+                          ) : null}
+                          {showCol("company") ? (
+                            <TableCell
+                              className="truncate font-medium"
+                              title={r.companyName}
                             >
-                              {pendingCheck === r.linkId ||
-                              activeBulkLinkId === r.linkId ? (
-                                <Loader2
-                                  className="size-4 animate-spin"
+                              {r.companyName}
+                            </TableCell>
+                          ) : null}
+                          {isAdmin && showCol("enabled") ? (
+                            <TableCell>
+                              <div className="flex justify-center">
+                                <Switch
+                                  checked={
+                                    enabledByCompany.get(r.companyId) ??
+                                    r.enabled
+                                  }
+                                  disabled={
+                                    bulkChecking ||
+                                    pendingToggle === r.companyId
+                                  }
+                                  onCheckedChange={(checked) => {
+                                    void toggleCompany(r.companyId, checked);
+                                  }}
+                                  aria-label={`Mostrar ${r.companyName} en monitoreo`}
+                                />
+                              </div>
+                            </TableCell>
+                          ) : null}
+                          {showCol("auto") ? (
+                            <TableCell className="whitespace-nowrap text-center align-middle">
+                              <AutoStatusChip status={r.verificationStatus} />
+                            </TableCell>
+                          ) : null}
+                          {showCol("site") ? (
+                            <TableCell className="text-center">
+                              <a
+                                href={r.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                title={r.url}
+                                aria-label={`Abrir en nueva pestaña: ${r.url}`}
+                                className={buttonVariants({
+                                  variant: "outline",
+                                  size: "icon",
+                                  className: "size-8",
+                                })}
+                              >
+                                <ExternalLink
+                                  className="size-3.5"
                                   aria-hidden
                                 />
+                              </a>
+                            </TableCell>
+                          ) : null}
+                          {showCol("url") ? (
+                            <TableCell className="min-w-0 overflow-hidden">
+                              <a
+                                href={r.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                title={r.url}
+                                className="block truncate font-mono text-xs text-primary underline-offset-2 hover:underline"
+                              >
+                                {r.url}
+                              </a>
+                            </TableCell>
+                          ) : null}
+                          {showCol("lines") ? (
+                            <TableCell className="whitespace-normal align-top">
+                              <div className="flex min-w-0 flex-col gap-1">
+                                <LinesStatusBadge
+                                  hasActiveLines={r.hasActiveLines}
+                                  className="max-w-full justify-center"
+                                />
+                                <select
+                                  disabled={bulkChecking}
+                                  className="h-8 w-full min-w-0 rounded-md border border-border bg-background px-1.5 text-xs dark:bg-zinc-950"
+                                  value={
+                                    r.hasActiveLines === null
+                                      ? "unknown"
+                                      : r.hasActiveLines
+                                        ? "yes"
+                                        : "no"
+                                  }
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    const next =
+                                      v === "unknown"
+                                        ? null
+                                        : v === "yes"
+                                          ? true
+                                          : false;
+                                    void patchLineStatus(r.linkId, next, true);
+                                  }}
+                                >
+                                  <option value="unknown">
+                                    Ajustar: desconocido
+                                  </option>
+                                  <option value="yes">
+                                    Ajustar: con líneas
+                                  </option>
+                                  <option value="no">
+                                    Ajustar: sin líneas
+                                  </option>
+                                </select>
+                              </div>
+                            </TableCell>
+                          ) : null}
+                          {showCol("reviewed") ? (
+                            <TableCell className="whitespace-nowrap text-center">
+                              <ReviewedBadge
+                                reviewed={r.isReviewed}
+                                className="justify-center"
+                              />
+                            </TableCell>
+                          ) : null}
+                          {showCol("manual") ? (
+                            <TableCell className="text-center">
+                              <ManualBadge
+                                manual={r.isManualReview}
+                                className="justify-center"
+                              />
+                            </TableCell>
+                          ) : null}
+                          {showCol("reviewedAt") ? (
+                            <TableCell
+                              className="whitespace-normal font-medium text-foreground tabular-nums"
+                              title={
+                                r.lastReviewedAt
+                                  ? new Date(r.lastReviewedAt).toLocaleString(
+                                      "es-MX",
+                                    )
+                                  : undefined
+                              }
+                            >
+                              <span suppressHydrationWarning>
+                                {r.lastReviewedAt
+                                  ? formatReviewedAt(r.lastReviewedAt)
+                                  : "—"}
+                              </span>
+                            </TableCell>
+                          ) : null}
+                          {showCol("screenshot") ? (
+                            <TableCell className="p-1 align-middle">
+                              {r.reviewScreenshotAt ? (
+                                <button
+                                  type="button"
+                                  title="Ver captura de verificación en grande"
+                                  aria-label="Ver captura de verificación en grande"
+                                  className="group relative block w-full cursor-pointer overflow-hidden rounded-sm border border-border bg-muted/40 transition hover:border-primary hover:ring-1 hover:ring-primary/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                                  onClick={() => {
+                                    setPreviewLinkId(r.linkId);
+                                    setPreviewScreenshotCacheKey(
+                                      r.reviewScreenshotAt ?? "",
+                                    );
+                                  }}
+                                >
+                                  {/* eslint-disable-next-line @next/next/no-img-element -- same-origin API + cookies */}
+                                  <img
+                                    src={`/api/company-links/${r.linkId}/screenshot?v=${encodeURIComponent(r.reviewScreenshotAt ?? "")}`}
+                                    alt="Captura de verificación"
+                                    width={80}
+                                    height={48}
+                                    className="block h-9 w-full object-cover object-top transition group-hover:opacity-60"
+                                    loading="lazy"
+                                  />
+                                  <span className="absolute inset-0 flex items-center justify-center opacity-0 transition group-hover:opacity-100">
+                                    <span className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                                      Ver
+                                    </span>
+                                  </span>
+                                </button>
                               ) : (
-                                "Verificar"
+                                <span className="text-muted-foreground">—</span>
                               )}
-                            </Button>
-                          </TableCell>
-                        ) : null}
-                        {showCol("verifyErr") ? (
-                          <TableCell className="text-center align-middle">
-                            {r.lastMonitorErrorMessage ? (
-                              <button
-                                type="button"
-                                className="inline-flex size-8 items-center justify-center rounded-md border border-destructive/45 text-destructive transition hover:bg-destructive/10"
-                                title={sanitizeEnvFromUserFacingText(
-                                  r.lastMonitorErrorMessage ?? "",
-                                )}
-                                aria-label="Ver error de la última verificación"
+                            </TableCell>
+                          ) : null}
+                          {showCol("actions") ? (
+                            <TableCell>
+                              <Button
+                                className="h-8 shrink-0 px-2.5 text-xs"
+                                size="sm"
+                                disabled={
+                                  bulkChecking ||
+                                  pendingCheck === r.linkId ||
+                                  !r.enabled ||
+                                  r.verificationStatus !== "yes"
+                                }
+                                title={
+                                  !r.enabled
+                                    ? "Compañía deshabilitada para usuarios."
+                                    : r.verificationStatus === "in-review"
+                                      ? "Protocolo en revisión; aún no habilitado para ejecución automática. Ajuste el estado con el desplegable de líneas activas."
+                                      : r.verificationStatus === "pending"
+                                        ? "El portal aún no cuenta con un flujo de verificación automatizable. Ajuste el estado con el desplegable de líneas activas."
+                                        : r.verificationStatus === "no"
+                                          ? "Este portal no tiene protocolo de verificación automatizado. Ajuste el estado con el desplegable de líneas activas."
+                                          : undefined
+                                }
                                 onClick={() => {
-                                  const msg = sanitizeEnvFromUserFacingText(
-                                    r.lastMonitorErrorMessage ?? "",
-                                  );
-                                  setVerificationErrorModal({
-                                    title: `${r.companyName} — error de verificación`,
-                                    userMessage: msg,
-                                    technicalDetail:
-                                      sanitizeEnvFromUserFacingText(
-                                        r.lastMonitorErrorDetail ?? "",
-                                      ),
-                                  });
+                                  void runCheck(r.linkId, r.companyName);
                                 }}
                               >
-                                <CircleAlert
-                                  className="size-4 shrink-0"
-                                  aria-hidden
-                                />
-                              </button>
-                            ) : (
-                              <span className="text-muted-foreground">—</span>
-                            )}
-                          </TableCell>
-                        ) : null}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+                                {pendingCheck === r.linkId ||
+                                activeBulkLinkId === r.linkId ? (
+                                  <Loader2
+                                    className="size-4 animate-spin"
+                                    aria-hidden
+                                  />
+                                ) : (
+                                  "Verificar"
+                                )}
+                              </Button>
+                            </TableCell>
+                          ) : null}
+                          {showCol("verifyErr") ? (
+                            <TableCell className="text-center align-middle">
+                              {r.lastMonitorErrorMessage ? (
+                                <button
+                                  type="button"
+                                  className="inline-flex size-8 items-center justify-center rounded-md border border-destructive/45 text-destructive transition hover:bg-destructive/10"
+                                  title={sanitizeEnvFromUserFacingText(
+                                    r.lastMonitorErrorMessage ?? "",
+                                  )}
+                                  aria-label="Ver error de la última verificación"
+                                  onClick={() => {
+                                    const msg = sanitizeEnvFromUserFacingText(
+                                      r.lastMonitorErrorMessage ?? "",
+                                    );
+                                    setVerificationErrorModal({
+                                      title: `${r.companyName} — error de verificación`,
+                                      userMessage: msg,
+                                      technicalDetail:
+                                        sanitizeEnvFromUserFacingText(
+                                          r.lastMonitorErrorDetail ?? "",
+                                        ),
+                                    });
+                                  }}
+                                >
+                                  <CircleAlert
+                                    className="size-4 shrink-0"
+                                    aria-hidden
+                                  />
+                                </button>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                          ) : null}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </div>
       )}
+      <CompanyLinkDetailSheet
+        row={detailRow}
+        open={detailRow !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDetailLinkId(null);
+          }
+        }}
+        verifying={
+          detailRow !== null &&
+          (pendingCheck === detailRow.linkId ||
+            activeBulkLinkId === detailRow.linkId)
+        }
+        actionsDisabled={
+          bulkChecking ||
+          (pendingCheck !== null && pendingCheck !== detailRow?.linkId)
+        }
+        onVerify={(row) => {
+          void runCheck(row.linkId, row.companyName);
+        }}
+        onAdjustLines={(linkId, hasActiveLines) => {
+          void patchLineStatus(linkId, hasActiveLines, true);
+        }}
+      />
       <ReviewScreenshotLightbox
         linkId={previewLinkId}
         cacheKey={previewScreenshotCacheKey ?? undefined}
