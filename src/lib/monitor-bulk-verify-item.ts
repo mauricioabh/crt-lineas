@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import {
   launchChromium,
   newContextWithEvalShim,
+  parseProxyUrl,
 } from "@/lib/playwright-launch";
 import {
   formatUnknownMonitorError,
@@ -11,6 +12,26 @@ import {
 import { executeAutomatedMonitorOnPage } from "@/lib/monitor-verify-link";
 import { requireMonitorCredentials } from "@/lib/verification-profile";
 import { getPattern } from "@/monitoring";
+
+/**
+ * IDs de patrón que deben salir por el proxy (`MONITOR_PROXY_URL`). Configurable
+ * con `MONITOR_PROXY_PATTERN_IDS` (coma-separado). Por defecto, los portales de
+ * Altán, cuyo WAF bloquea la IP del datacenter.
+ */
+function proxyPatternIds(): Set<string> {
+  const raw = process.env.MONITOR_PROXY_PATTERN_IDS?.trim();
+  const ids = raw
+    ? raw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : ["altan-rnu", "altan-rnu-consulta"];
+  return new Set(ids);
+}
+
+function patternRequiresProxy(patternId: string): boolean {
+  return proxyPatternIds().has(patternId);
+}
 
 export type VerifyMonitorLinkResult = {
   ok: boolean;
@@ -68,11 +89,18 @@ export async function verifyMonitorLinkForBulk(params: {
 
   const credentials = await requireMonitorCredentials(params.userId);
 
+  // Algunos portales (p. ej. Altán RNU) bloquean por IP la red del datacenter
+  // (AWS WAF → 403). Para esos patrones enrutamos Chromium por un proxy
+  // (IP residencial/limpia) definido en `MONITOR_PROXY_URL`. El resto sale directo.
+  const proxy = patternRequiresProxy(pattern.id)
+    ? parseProxyUrl(process.env.MONITOR_PROXY_URL)
+    : null;
+
   let browser: Browser | null = null;
   let context: BrowserContext | null = null;
 
   try {
-    browser = await launchChromium({ headless: true });
+    browser = await launchChromium({ headless: true, proxy });
     context = await newContextWithEvalShim(browser);
     const page = await context.newPage();
     try {
