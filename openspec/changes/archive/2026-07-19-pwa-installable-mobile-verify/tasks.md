@@ -17,5 +17,5 @@
 
 - [x] 3.1 Update `docs/TECH_STACK.md` (and README notes if useful) to document installable PWA without offline
 - [x] 3.2 Run `npm run typecheck` and `npm run lint`
-- [ ] 3.3 Manual smoke: Chrome installability / standalone; mobile viewport search → detail → Verify on an eligible link; desktop table + bulk still work
+- [x] 3.3 Manual smoke: Chrome installability / standalone; mobile viewport search → detail → Verify on an eligible link; desktop table + bulk still work
 - [x] 3.4 Run `openspec validate pwa-installable-mobile-verify --strict`

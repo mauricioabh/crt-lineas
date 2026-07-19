@@ -1,5 +1,7 @@
 # dashboard-datetime-display
 
+## Purpose
+
 Presentación de fechas/horas en el dashboard: las marcas temporales almacenadas en UTC se muestran al usuario en su zona horaria local.
 
 ## Requirements
