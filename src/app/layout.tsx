@@ -1,6 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
-import { rootLayoutMetadata } from "@/lib/seo/metadata";
+import { rootLayoutMetadata, rootLayoutViewport } from "@/lib/seo/metadata";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = rootLayoutMetadata();
+export const viewport = rootLayoutViewport();
 
 export default function RootLayout({
   children,

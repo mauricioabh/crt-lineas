@@ -62,6 +62,18 @@ El scraping y la verificación se despachan como eventos Inngest y los consume u
 
 > **Nota**: `framer-motion` solo se usa en componentes `"use client"` (p. ej. `src/app/_marketing/landing.tsx`, `src/components/motion/*`). Las páginas server siguen siendo RSC donde aplica.
 
+## PWA (instalable, sin offline)
+
+La app es una **PWA instalable** ("Añadir a pantalla de inicio" / Install) sin service worker ni modo offline:
+
+- Manifest generado por Next (`src/app/manifest.ts` → `/manifest.webmanifest`): `display: standalone`, `start_url: /dashboard`, iconos 192/512 + maskable (`public/icons/`).
+- Metadata raíz (`src/lib/seo/metadata.ts`): `themeColor` (viewport), `appleWebApp` y apple-touch-icon para iOS.
+- El matcher de Clerk (`src/proxy.ts`) excluye `.webmanifest`, así que el manifest se sirve sin auth.
+- **Sin** service worker, cache offline ni colas locales (decisión v1): Clerk + APIs + jobs remotos no aportan valor offline. No se usa `next-pwa`/Serwist.
+- En iOS no hay prompt nativo de instalación; se usa "Añadir a pantalla de inicio" de Safari.
+
+En viewports `< md` el dashboard muestra una lista compacta con detalle en sheet (verificación individual); la tabla completa con bulk verify queda para `md+`.
+
 ## Dev tooling
 
 | Tecnología  | Rol                                         |
