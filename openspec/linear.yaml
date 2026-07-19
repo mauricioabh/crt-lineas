@@ -15,3 +15,11 @@ archive_documents:
       id: "32ab3df0-4ba3-4063-a476-c4138526b625"
       url: "https://linear.app/wayool/document/openspec-dashboard-datetime-display-12f90c3c32a9"
       title: "OpenSpec: dashboard-datetime-display"
+    "pwa-installability":
+      id: "3d73eee1-c6d3-4196-979c-9b9fcc5c0ce0"
+      url: "https://linear.app/wayool/document/openspec-pwa-installability-deb5b90d6b5d"
+      title: "OpenSpec: pwa-installability"
+    "mobile-dashboard-verify":
+      id: "a9161c8c-eeec-4095-ad5a-2fff7f58a423"
+      url: "https://linear.app/wayool/document/openspec-mobile-dashboard-verify-4cac009104e3"
+      title: "OpenSpec: mobile-dashboard-verify"
