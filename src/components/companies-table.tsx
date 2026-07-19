@@ -1818,8 +1818,12 @@ export function CompaniesTable({
                 <CompaniesMobileList
                   rows={displayRows}
                   pendingCheckLinkId={pendingCheck ?? activeBulkLinkId}
+                  actionsDisabled={bulkChecking || pendingCheck !== null}
                   onOpenDetail={(linkId) => {
                     setDetailLinkId(linkId);
+                  }}
+                  onVerify={(row) => {
+                    void runCheck(row.linkId, row.companyName);
                   }}
                 />
               </div>
