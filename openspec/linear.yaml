@@ -1,0 +1,17 @@
+team:
+  id: "918d1d41-95ee-429a-976f-e380f65feb8b"
+  key: "WAY"
+  name: "Wayool"
+project:
+  id: "92cfab2f-aa3e-42b3-8595-0d8223fdea3b"
+  name: "crt-lineas"
+issue_label_filter:
+  name: "crt-lineas"
+archive_documents:
+  enabled: true
+  title_prefix: "OpenSpec:"
+  documents:
+    "dashboard-datetime-display":
+      id: "32ab3df0-4ba3-4063-a476-c4138526b625"
+      url: "https://linear.app/wayool/document/openspec-dashboard-datetime-display-12f90c3c32a9"
+      title: "OpenSpec: dashboard-datetime-display"

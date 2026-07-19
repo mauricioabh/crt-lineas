@@ -41,12 +41,17 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   useTransition,
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/utils";
 
 type VerificationStatus = "yes" | "in-review" | "pending" | "no";
+
+const subscribeToHydration = () => () => {};
+const getClientHydrationSnapshot = () => true;
+const getServerHydrationSnapshot = () => false;
 
 type FlatRow = {
   num: number;
@@ -327,7 +332,17 @@ function rowMatchesFilters(
   return true;
 }
 
-function formatReviewedAt(iso: string): string {
+function formatReviewedAt(
+  iso: string,
+  style: "compact" | "full" = "compact",
+): string {
+  if (style === "full") {
+    return new Date(iso).toLocaleString("es-MX", {
+      dateStyle: "full",
+      timeStyle: "medium",
+    });
+  }
+
   return new Date(iso).toLocaleString("es-MX", {
     year: "numeric",
     month: "numeric",
@@ -489,6 +504,11 @@ export function CompaniesTable({
   isAdmin: boolean;
 }) {
   const router = useRouter();
+  const mounted = useSyncExternalStore(
+    subscribeToHydration,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot,
+  );
   const [pendingIngest, startIngest] = useTransition();
   const [pendingCheck, setPendingCheck] = useState<string | null>(null);
   const [pendingToggle, setPendingToggle] = useState<string | null>(null);
@@ -2125,15 +2145,13 @@ export function CompaniesTable({
                           <TableCell
                             className="whitespace-normal font-medium text-foreground tabular-nums"
                             title={
-                              r.lastReviewedAt
-                                ? new Date(r.lastReviewedAt).toLocaleString(
-                                    "es-MX",
-                                  )
+                              mounted && r.lastReviewedAt
+                                ? formatReviewedAt(r.lastReviewedAt, "full")
                                 : undefined
                             }
                           >
-                            <span suppressHydrationWarning>
-                              {r.lastReviewedAt
+                            <span>
+                              {mounted && r.lastReviewedAt
                                 ? formatReviewedAt(r.lastReviewedAt)
                                 : "—"}
                             </span>
