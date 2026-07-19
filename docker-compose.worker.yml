@@ -8,12 +8,20 @@ services:
     build:
       context: .
       dockerfile: worker/Dockerfile
-    image: ${WORKER_IMAGE:-ghcr.io/OWNER/crt-lineas-worker:latest}
+    image: ${WORKER_IMAGE:-ghcr.io/mauricioabh/crt-lineas-worker:latest}
     restart: unless-stopped
     env_file:
       - .env.worker
     ports:
-      - "3100:3100"
+      - "127.0.0.1:3100:3100"
+    # `host.docker.internal` apunta al host; útil para proxies locales. Para el
+    # túnel SSH reverse (proxy residencial de la laptop) usamos la IP fija del
+    # gateway de la red de abajo (172.28.0.1) en `MONITOR_PROXY_URL`, porque el
+    # tráfico entre bridges distintos puede quedar bloqueado por el firewall.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - default
     healthcheck:
       test:
         [
@@ -26,3 +34,13 @@ services:
       timeout: 5s
       retries: 3
       start_period: 20s
+
+# Red con subred/gateway FIJOS: así `MONITOR_PROXY_URL=socks5://172.28.0.1:1080`
+# (el gateway) siempre resuelve al host, sin depender del orden de creación de
+# redes de Docker. El túnel SSH de la laptop debe enlazar en 172.28.0.1:1080.
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1

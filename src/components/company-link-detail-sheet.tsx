@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleAlert, ExternalLink, Loader2, X } from "lucide-react";
+import { ExternalLink, Loader2, X, CircleAlert } from "lucide-react";
 import { useEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
@@ -28,7 +28,17 @@ function useIsClient() {
   );
 }
 
-function formatReviewedAt(iso: string): string {
+function formatReviewedAt(
+  iso: string,
+  style: "compact" | "full" = "compact",
+): string {
+  if (style === "full") {
+    return new Date(iso).toLocaleString("es-MX", {
+      dateStyle: "full",
+      timeStyle: "medium",
+    });
+  }
+
   return new Date(iso).toLocaleString("es-MX", {
     year: "numeric",
     month: "numeric",
@@ -186,10 +196,12 @@ export function CompanyLinkDetailSheet({
               Última revisión
             </dt>
             <dd className="mt-1 tabular-nums text-foreground">
-              <span suppressHydrationWarning>
-                {row.lastReviewedAt
+              <span>
+                {isClient && row.lastReviewedAt
                   ? formatReviewedAt(row.lastReviewedAt)
-                  : "Sin revisiones registradas"}
+                  : row.lastReviewedAt
+                    ? "…"
+                    : "Sin revisiones registradas"}
               </span>
             </dd>
           </div>

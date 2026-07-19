@@ -5,17 +5,53 @@ import {
   type Page,
 } from "playwright";
 
+/** Config de proxy en el formato que espera Playwright (`chromium.launch`). */
+export type ProxyConfig = {
+  server: string;
+  username?: string;
+  password?: string;
+};
+
+/**
+ * Convierte una URL de proxy (`socks5://host:port`, `http://user:pass@host:port`)
+ * en el objeto que espera Playwright. Devuelve `null` si está vacía o es inválida.
+ */
+export function parseProxyUrl(
+  raw: string | undefined | null,
+): ProxyConfig | null {
+  const val = raw?.trim();
+  if (!val) return null;
+  try {
+    const u = new URL(val);
+    const cfg: ProxyConfig = { server: `${u.protocol}//${u.host}` };
+    if (u.username) cfg.username = decodeURIComponent(u.username);
+    if (u.password) cfg.password = decodeURIComponent(u.password);
+    return cfg;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Lanza Chromium usando el navegador instalado por `playwright install`.
  *
  * El navegador solo corre en el worker Hetzner (proceso Node persistente); ya
  * no se ejecuta en Vercel serverless, por lo que no se usa `@sparticuz/chromium`.
+ *
+ * `proxy` es opcional y solo se aplica a portales que lo requieren (p. ej. Altán,
+ * cuyo WAF bloquea la IP del datacenter). Se fija en el `launch` a propósito:
+ * Chromium habilita el proxy de forma fiable a nivel de navegador, evitando las
+ * limitaciones del proxy por contexto.
  */
 export async function launchChromium(options?: {
   headless?: boolean;
+  proxy?: ProxyConfig | null;
 }): Promise<Browser> {
   const wantHeadless = options?.headless ?? true;
-  return chromium.launch({ headless: wantHeadless });
+  return chromium.launch({
+    headless: wantHeadless,
+    ...(options?.proxy ? { proxy: options.proxy } : {}),
+  });
 }
 
 /**
